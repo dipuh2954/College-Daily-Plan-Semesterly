@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Absolute Timetable — Dipu, Sem 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #131920;
+    --surface3: #1a2230;
+    --border: #1e2d3d;
+    --accent: #00e5ff;
+    --accent2: #39ff14;
+    --accent3: #ff6b35;
+    --accent4: #a855f7;
+    --accent5: #f0c040;
+    --red: #ff4444;
+    --text: #c9d1d9;
+    --text-dim: #6e7f8d;
+    --text-bright: #e6edf3;
+    --glow: 0 0 20px rgba(0,229,255,0.15);
+    --glow-green: 0 0 20px rgba(57,255,20,0.15);
+    --glow-orange: 0 0 20px rgba(255,107,53,0.15);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    z-index: 100;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    text-shadow: var(--glow);
+  }
+  .sidebar-brand .sub {
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .sidebar-section-title {
+    padding: 10px 20px 6px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+  }
+  .sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 20px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 11px;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar a:hover, .sidebar a.active {
+    color: var(--accent);
+    background: rgba(0,229,255,0.04);
+    border-left-color: var(--accent);
+  }
+  .sidebar a .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-mon { background: var(--accent2); }
+  .dot-tue { background: var(--accent); }
+  .dot-wed { background: var(--accent3); }
+  .dot-thu { background: var(--accent4); }
+  .dot-fri { background: var(--accent5); }
+  .dot-sat { background: var(--red); }
+  .dot-sun { background: #888; }
+  .dot-tip { background: var(--accent3); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 70px 60px 50px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 460px; height: 460px;
+    background: radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 18px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .hero-eyebrow::before { content: '> '; opacity: 0.5; }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(34px, 4.5vw, 60px);
+    line-height: 1.05;
+    color: var(--text-bright);
+    letter-spacing: -2px;
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+  .hero h1 .c { color: var(--accent); text-shadow: var(--glow); }
+  .hero h1 .g { color: var(--accent2); text-shadow: var(--glow-green); }
+  .hero h1 .o { color: var(--accent3); }
+  .hero-desc {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+    max-width: 640px;
+    line-height: 1.7;
+    animation: fadeUp 0.5s ease 0.2s both;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 28px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.5s ease 0.3s both;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat .label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .stat .value {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+  .stat .value.c { color: var(--accent); text-shadow: var(--glow); }
+  .stat .value.g { color: var(--accent2); text-shadow: var(--glow-green); }
+  .stat .value.o { color: var(--accent3); }
+  .stat .value.r { color: var(--red); }
+
+  /* ── WARNING BANNER ── */
+  .warning-banner {
+    margin: 40px 60px 0;
+    padding: 20px 24px;
+    border: 1px solid rgba(255,68,68,0.4);
+    background: rgba(255,68,68,0.05);
+    border-radius: 8px;
+    animation: fadeUp 0.5s ease 0.4s both;
+  }
+  .warning-banner .w-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+  .warning-banner p {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .warning-banner strong { color: var(--text); }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 60px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: var(--text-bright);
+    letter-spacing: -1px;
+    margin-bottom: 6px;
+  }
+  .section-title .c { color: var(--accent); }
+  .section-title .g { color: var(--accent2); }
+  .section-title .o { color: var(--accent3); }
+  .section-title .p { color: var(--accent4); }
+  .section-title .y { color: var(--accent5); }
+  .section-title .r { color: var(--red); }
+  .section-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+
+  /* ── REALITY CHECK TABLE ── */
+  .reality-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .reality-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+  }
+  .reality-card .rc-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .reality-card .rc-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .reality-card .rc-item:last-child { border-bottom: none; }
+  .reality-card .rc-item .key {
+    color: var(--accent);
+    min-width: 100px;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline {
+    position: relative;
+    margin-top: 28px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 80px;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .t-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    position: relative;
+    margin-bottom: 4px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .t-time {
+    min-width: 80px;
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    padding: 10px 14px 10px 0;
+    text-align: right;
+    line-height: 1.4;
+  }
+  .t-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-top: 12px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .t-content {
+    flex: 1;
+    margin-left: 16px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1.6;
+    margin-bottom: 2px;
+  }
+  .t-content .t-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .t-content .t-desc {
+    color: var(--text-dim);
+    font-size: 10px;
+  }
+  .t-content .t-tag {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+    margin-top: 4px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Timeline row types */
+  .t-sleep   .t-dot { background: #334; border: 1px solid #445; }
+  .t-sleep   .t-content { background: rgba(51,51,68,0.3); }
+  .t-sleep   .t-content .t-title { color: #778; }
+
+  .t-routine .t-dot { background: #2a3a2a; border: 1px solid var(--accent2); }
+  .t-routine .t-content { background: rgba(57,255,20,0.04); border-left: 2px solid rgba(57,255,20,0.2); }
+  .t-routine .t-content .t-title { color: var(--accent2); }
+
+  .t-workout .t-dot { background: var(--accent3); box-shadow: 0 0 8px rgba(255,107,53,0.4); }
+  .t-workout .t-content { background: rgba(255,107,53,0.06); border-left: 2px solid rgba(255,107,53,0.3); }
+  .t-workout .t-content .t-title { color: var(--accent3); }
+
+  .t-travel  .t-dot { background: var(--accent5); box-shadow: 0 0 8px rgba(240,192,64,0.3); }
+  .t-travel  .t-content { background: rgba(240,192,64,0.05); border-left: 2px solid rgba(240,192,64,0.3); }
+  .t-travel  .t-content .t-title { color: var(--accent5); }
+
+  .t-college .t-dot { background: var(--accent); box-shadow: 0 0 8px rgba(0,229,255,0.3); }
+  .t-college .t-content { background: rgba(0,229,255,0.05); border-left: 2px solid rgba(0,229,255,0.3); }
+  .t-college .t-content .t-title { color: var(--accent); }
+
+  .t-android .t-dot { background: var(--accent2); box-shadow: 0 0 10px rgba(57,255,20,0.5); }
+  .t-android .t-content { background: rgba(57,255,20,0.07); border-left: 3px solid var(--accent2); }
+  .t-android .t-content .t-title { color: var(--accent2); text-shadow: var(--glow-green); }
+
+  .t-study   .t-dot { background: var(--accent4); box-shadow: 0 0 8px rgba(168,85,247,0.3); }
+  .t-study   .t-content { background: rgba(168,85,247,0.05); border-left: 2px solid rgba(168,85,247,0.3); }
+  .t-study   .t-content .t-title { color: var(--accent4); }
+
+  .t-meal    .t-dot { background: #3a2a1a; border: 1px solid var(--accent3); }
+  .t-meal    .t-content { background: rgba(255,107,53,0.03); }
+  .t-meal    .t-content .t-title { color: #a07050; }
+
+  .t-free    .t-dot { background: #2a2a2a; border: 1px solid #444; }
+  .t-free    .t-content { background: rgba(255,255,255,0.02); }
+  .t-free    .t-content .t-title { color: #666; }
+
+  .t-warn    .t-dot { background: var(--red); box-shadow: 0 0 8px rgba(255,68,68,0.4); }
+  .t-warn    .t-content { background: rgba(255,68,68,0.06); border-left: 2px solid rgba(255,68,68,0.3); }
+  .t-warn    .t-content .t-title { color: var(--red); }
+
+  /* Tags */
+  .tag-android { background: rgba(57,255,20,0.12); color: var(--accent2); }
+  .tag-study   { background: rgba(168,85,247,0.12); color: var(--accent4); }
+  .tag-college { background: rgba(0,229,255,0.10); color: var(--accent); }
+  .tag-warn    { background: rgba(255,68,68,0.12); color: var(--red); }
+  .tag-travel  { background: rgba(240,192,64,0.12); color: var(--accent5); }
+  .tag-free    { background: rgba(120,120,120,0.12); color: #888; }
+
+  /* ── DAY HEADER ── */
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .day-badge {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 48px;
+    letter-spacing: -3px;
+    opacity: 0.08;
+    line-height: 1;
+    user-select: none;
+  }
+  .day-info {}
+  .day-type {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    font-family: 'Space Mono', monospace;
+  }
+  .day-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: -1px;
+  }
+  .day-stat-row {
+    display: flex;
+    gap: 20px;
+    margin: 12px 0 4px;
+    flex-wrap: wrap;
+  }
+  .day-stat {
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  .day-stat span { color: var(--text); }
+
+  /* ── CLASSES TABLE ── */
+  .classes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 11px;
+  }
+  .classes-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+    font-family: 'Space Mono', monospace;
+  }
+  .classes-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(30,45,61,0.5);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .classes-table tr:last-child td { border-bottom: none; }
+  .classes-table .time-col { color: var(--text-dim); font-size: 10px; white-space: nowrap; }
+  .classes-table .subj { color: var(--accent); }
+  .classes-table .tip-cell {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .classes-table .tip-cell .tick { color: var(--accent2); margin-right: 4px; }
+
+  /* ── SUBJECT BUDGET ── */
+  .budget-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+  .budget-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    transition: all 0.25s;
+  }
+  .budget-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--glow);
+  }
+  .budget-card .bc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .budget-card .bc-subj {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+  .budget-card .bc-code {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+  .budget-card .bc-hours {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    text-shadow: var(--glow);
+  }
+  .budget-card .bc-bar-bg {
+    height: 3px;
+    background: var(--surface3);
+    border-radius: 2px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .budget-card .bc-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  .budget-card .bc-items {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .budget-card .bc-items li {
+    list-style: none;
+    padding-left: 12px;
+    position: relative;
+  }
+  .budget-card .bc-items li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--text-dim);
+    font-size: 9px;
+  }
+
+  /* ── TRAIN PLAYBOOK ── */
+  .train-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .train-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .train-card .tc-icon { font-size: 24px; margin-bottom: 10px; }
+  .train-card .tc-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-bright);
+    margin-bottom: 10px;
+  }
+  .train-card .tc-items {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.9;
+  }
+  .train-card .tc-items li { list-style: none; padding-left: 14px; position: relative; }
+  .train-card .tc-items li::before { content: '◆'; position: absolute; left: 0; font-size: 6px; top: 5px; }
+  .train-card.do .tc-items li::before { color: var(--accent2); }
+  .train-card.dont .tc-items li::before { color: var(--red); }
+  .train-card.strategy .tc-items li::before { color: var(--accent); }
+
+  /* ── LAWS SECTION ── */
+  .laws-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .law-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    transition: all 0.25s;
+  }
+  .law-card:hover { transform: translateX(4px); }
+  .law-card.danger { border-color: rgba(255,68,68,0.3); }
+  .law-card.danger:hover { border-color: var(--red); box-shadow: 0 0 16px rgba(255,68,68,0.1); }
+  .law-card.safe { border-color: rgba(57,255,20,0.2); }
+  .law-card.safe:hover { border-color: var(--accent2); box-shadow: var(--glow-green); }
+  .law-card.info { border-color: rgba(0,229,255,0.2); }
+  .law-card.info:hover { border-color: var(--accent); box-shadow: var(--glow); }
+  .law-card .law-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .law-card .law-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .law-card.danger .law-title { color: var(--red); }
+  .law-card.safe .law-title { color: var(--accent2); }
+  .law-card.info .law-title { color: var(--accent); }
+  .law-card .law-body {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .law-card .law-body strong { color: var(--text); }
+
+  /* ── WEEK OVERVIEW GRID ── */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .week-day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 12px;
+    text-align: center;
+    transition: all 0.25s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .week-day-card:hover { transform: translateY(-3px); }
+  .week-day-card .wd-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 6px;
+  }
+  .week-day-card .wd-type {
+    font-size: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .week-day-card .wd-wake {
+    font-size: 16px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .week-day-card .wd-label { font-size: 8px; color: var(--text-dim); }
+  .week-day-card .wd-dots {
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .week-day-card .wd-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist {
+    margin-top: 20px;
+  }
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--surface);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .checklist-item:hover { border-color: var(--accent2); color: var(--text); }
+  .checklist-item .ci-box {
+    width: 14px; height: 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.2s;
+  }
+  .checklist-item:hover .ci-box { border-color: var(--accent2); }
+  .checklist-item .ci-text { line-height: 1.5; }
+  .checklist-item .ci-text strong { color: var(--text); display: block; margin-bottom: 1px; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── NOTICE BLOCK ── */
+  .notice {
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1.7;
+    margin: 16px 0;
+  }
+  .notice.cyan { background: rgba(0,229,255,0.06); border-left: 3px solid var(--accent); color: var(--text-dim); }
+  .notice.green { background: rgba(57,255,20,0.06); border-left: 3px solid var(--accent2); color: var(--text-dim); }
+  .notice.orange { background: rgba(255,107,53,0.06); border-left: 3px solid var(--accent3); color: var(--text-dim); }
+  .notice.red { background: rgba(255,68,68,0.06); border-left: 3px solid var(--red); color: var(--text-dim); }
+  .notice strong { color: var(--text-bright); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── INLINE CODE ── */
+  code {
+    background: var(--surface3);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero, .section { padding: 40px 24px; }
+    .reality-grid, .train-grid { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════ SIDEBAR ══════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">THE ABSOLUTE</div>
+    <div class="logo" style="color:var(--accent2)">TIMETABLE</div>
+    <div class="sub">Dipu · Sem 4 · Bongaon → BPPIMT</div>
+  </div>
+
+  <div class="sidebar-section-title">Navigate</div>
+  <a href="#reality"><span class="dot dot-tip"></span> Reality Check</a>
+  <a href="#week-view"><span class="dot dot-mon"></span> Week at a Glance</a>
+
+  <div class="sidebar-section-title">Daily Schedules</div>
+  <a href="#monday"><span class="dot dot-mon"></span> Monday — Home Day</a>
+  <a href="#tuesday"><span class="dot dot-tue"></span> Tuesday — College</a>
+  <a href="#wednesday"><span class="dot dot-wed"></span> Wednesday — College</a>
+  <a href="#thursday"><span class="dot dot-thu"></span> Thursday — Labs</a>
+  <a href="#friday"><span class="dot dot-fri"></span> Friday — Long Day</a>
+  <a href="#saturday"><span class="dot dot-sat"></span> Saturday — Training</a>
+  <a href="#sunday"><span class="dot dot-sun"></span> Sunday — Reset</a>
+
+  <div class="sidebar-section-title">Strategy</div>
+  <a href="#train"><span class="dot dot-tip"></span> Train Time Playbook</a>
+  <a href="#budget"><span class="dot dot-tip"></span> Weekly Study Budget</a>
+  <a href="#android"><span class="dot dot-mon"></span> Android Dev Integration</a>
+  <a href="#laws"><span class="dot dot-tip"></span> Laws &amp; Warnings</a>
+  <a href="#weekly-checklist"><span class="dot dot-tip"></span> Weekly Checklist</a>
+</nav>
+
+<!-- ══════════════════════ MAIN ══════════════════════ -->
+<main class="main">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">BPPIMT · MAKAUT · CSE SEM 4 · 2025</div>
+  <h1>The <span class="c">Absolute</span><br>Daily <span class="g">Timetable</span></h1>
+  <p class="hero-desc">
+    Built ground-up from real constraints: Bongaon departure at 5:45 AM, 1.5-hour train commute each way,
+    bulking-phase workout, 6-subject academics, and the Android/Kotlin roadmap — all woven into one non-negotiable system.
+    This file does not negotiate. Follow it exactly.
+  </p>
+  <div class="hero-stats">
+    <div class="stat"><div class="label">Wake (College Days)</div><div class="value r">3:30 AM</div></div>
+    <div class="stat"><div class="label">Wake (Home Days)</div><div class="value g">4:30 AM</div></div>
+    <div class="stat"><div class="label">Commute / Day</div><div class="value o">~3.5 hrs</div></div>
+    <div class="stat"><div class="label">Android Dev / Week</div><div class="value c">~9 hrs</div></div>
+    <div class="stat"><div class="label">Academic Study / Week</div><div class="value" style="color:var(--accent4)">~14 hrs</div></div>
+    <div class="stat"><div class="label">Subjects</div><div class="value">6</div></div>
+  </div>
+</section>
+
+<!-- WARNING -->
+<div class="warning-banner" id="reality">
+  <div class="w-title">⚠ SLEEP DEBT WARNING — READ BEFORE PROCEEDING</div>
+  <p>
+    On college days (Tue–Sat), this schedule produces <strong>~5–5.5 hours of sleep</strong> per night (3:30 AM wake, 9–10 PM sleep).
+    This is below the biological minimum for cognitive function, muscle recovery, and memory consolidation — all three of which
+    you need simultaneously (academics + bulking + coding). <strong>Compensate aggressively on Sunday</strong> (minimum 8 hrs),
+    sleep early on Saturday (by 9:30 PM), and treat Friday evening as a light-work-only zone. If sleep debt accumulates
+    beyond 2 consecutive weeks, expect performance drops in both gym and studies. You have been warned.
+  </p>
+</div>
+
+<!-- REALITY CHECK -->
+<section class="section">
+  <div class="section-label">§ 00 — Constraints</div>
+  <div class="section-title">The <span class="r">Real</span> Numbers</div>
+  <p class="section-sub">Before any schedule makes sense, the hard numbers must be faced.</p>
+
+  <div class="reality-grid">
+    <div class="reality-card">
+      <div class="rc-label">Commute Chain (College Days)</div>
+      <div class="rc-item"><span class="key">5:45 AM</span> Leave home (Bongaon)</div>
+      <div class="rc-item"><span class="key">6:00 AM</span> Board auto-rickshaw</div>
+      <div class="rc-item"><span class="key">~6:30 AM</span> Reach Bongaon Station</div>
+      <div class="rc-item"><span class="key">7:30 AM</span> Board Bongaon–Sealdah Local</div>
+      <div class="rc-item"><span class="key">~9:10 AM</span> Arrive Sealdah (~1.5–2 hr journey)</div>
+      <div class="rc-item"><span class="key">~9:30 AM</span> Reach BPPIMT (bus/metro)</div>
+      <div class="rc-item"><span class="key">~5:00 PM</span> Leave college after last slot</div>
+      <div class="rc-item"><span class="key">~8:00 PM</span> Reach home (Tue–Thu)</div>
+      <div class="rc-item"><span class="key">~9:00 PM</span> Reach home (Friday — latest)</div>
+    </div>
+    <div class="reality-card">
+      <div class="rc-label">Morning Block Math (College Days)</div>
+      <div class="rc-item"><span class="key">3:30 AM</span> Alarm — no snooze protocol</div>
+      <div class="rc-item"><span class="key">3:30–4:30</span> Morning routine (hygiene, pre-workout fuel)</div>
+      <div class="rc-item"><span class="key">4:30–5:30</span> Workout — bulking phase (1 hr HARD)</div>
+      <div class="rc-item"><span class="key">5:30–5:45</span> Post-workout shake, dress, pack bag</div>
+      <div class="rc-item"><span class="key">5:45</span> Zero-tolerance departure</div>
+      <div class="rc-item"><span class="key">Note</span> No Android dev in morning on college days. The train commute IS your study window.</div>
+    </div>
+    <div class="reality-card">
+      <div class="rc-label">Sleep Calculation</div>
+      <div class="rc-item"><span class="key">Tue–Thu</span> Sleep 10:00 PM → Wake 3:30 AM = <strong style="color:var(--accent3)">5.5 hrs</strong></div>
+      <div class="rc-item"><span class="key">Friday</span> Sleep 11:00 PM → Wake 3:30 AM = <strong style="color:var(--red)">4.5 hrs</strong></div>
+      <div class="rc-item"><span class="key">Saturday</span> Sleep 9:30 PM → Wake 4:00 AM = <strong style="color:var(--accent3)">6.5 hrs</strong></div>
+      <div class="rc-item"><span class="key">Sunday</span> Sleep 9:30 PM → Wake 6:00 AM = <strong style="color:var(--accent2)">8.5 hrs ← RECOVERY</strong></div>
+      <div class="rc-item"><span class="key">Monday</span> Sleep 10:00 PM → Wake 4:30 AM = <strong style="color:var(--accent2)">6.5 hrs</strong></div>
+    </div>
+    <div class="reality-card">
+      <div class="rc-label">Weekly Effective Study Hours</div>
+      <div class="rc-item"><span class="key">Train (both ways)</span> ~3 hrs/day × 5 days = <strong style="color:var(--accent)">~15 hrs/week</strong> (reading only)</div>
+      <div class="rc-item"><span class="key">Evening (home)</span> 1.5 hrs × 4 days = <strong style="color:var(--accent4)">6 hrs</strong></div>
+      <div class="rc-item"><span class="key">Monday (home)</span> Full blocks = <strong style="color:var(--accent2)">~7 hrs academics</strong></div>
+      <div class="rc-item"><span class="key">Sunday (home)</span> Light revision = <strong style="color:var(--accent2)">~4 hrs</strong></div>
+      <div class="rc-item"><span class="key">Total Academic</span> <strong style="color:var(--accent2)">~32 hrs/week</strong> (incl. college)</div>
+    </div>
+  </div>
+</section>
+
+<!-- WEEK AT A GLANCE -->
+<section class="section" id="week-view">
+  <div class="section-label">§ 01 — Overview</div>
+  <div class="section-title">Week at a <span class="c">Glance</span></div>
+  <p class="section-sub">Click a day to jump to its full schedule.</p>
+
+  <div class="week-grid">
+    <a class="week-day-card" href="#monday" style="border-color:rgba(57,255,20,0.3)">
+      <div class="wd-name">MON</div>
+      <div class="wd-type">HOME DAY</div>
+      <div class="wd-wake" style="color:var(--accent2)">4:30</div>
+      <div class="wd-label">wake up</div>
+      <div class="wd-dots">
+        <div class="wd-dot" style="background:var(--accent3)"></div>
+        <div class="wd-dot" style="background:var(--accent2)"></div>
+        <div class="wd-dot" style="background:var(--accent4)"></div>
+        <div class="wd-dot" style="background:var(--accent2)"></div>
+      </div>
+    </a>
+    <a class="week-day-card" href="#tuesday" style="border-color:rgba(0,229,255,0.3)">
+      <div class="wd-name">TUE</div>
+      <div class="wd-type">COLLEGE</div>
+      <div class="wd-wake" style="color:var(--red)">3:30</div>
+      <div class="wd-label">wake up</div>
+      <div class="wd-dots">
+        <div class="wd-dot" style="background:var(--accent3)"></div>
+        <div class="wd-dot" style="background:var(--accent5)"></div>
+        <div class="wd-dot" style="background:var(--accent)"></div>
+        <div class="wd-dot" style="background:var(--accent4)"></div>
+        <div class="wd-dot" style="background:var(--accent2)"></div>
+      </div>
+    </a>
+    <a class="week-day-card" href="#wednesday" style="border-color:rgba(255,107,53,0.3)">
+      <div class="wd-name">WED</div>
+      <div class="wd-type">COLLEGE</div>
+      <div class="wd-wake" style="color:var(--red)">3:30</div>
+      <div class="wd-label">wake up</div>
+      <div class="wd-dots">
+        <div class="wd-dot" style="background:var(--accent3)"></div>
+        <div class="wd-dot" style="background:var(--accent5)"></div>
+        <div class="wd-dot" style="background:var(--accent)"></div>
+        <div class="wd-dot" style="background:var(--accent4)"></div>
+        <div class="wd-dot" style="background:var(--accent2)"></div>
+      </div>
+    </a>
+    <a class="week-day-card" href="#thursday" style="border-color:rgba(168,85,247,0.3)">
+      <div class="wd-name">THU</div>
+      <div class="wd-type">LABS</div>
+      <div class="wd-wake" style="color:var(--red)">3:30</div>
+      <div class="wd-label">wake up</div>
+      <div class="wd-dots">
+        <div class="wd-dot" style="background:var(--accent3)"></div>
+        <div class="wd-dot" style="background:var(--accent5)"></div>
+        <div class="wd-dot" style="background:var(--accent)"></div>
+        <div class="wd-dot" style="background:var(--accent4)"></div>
+        <div class="wd-dot" style="background:var(--accent2)"></div>
+      </div>
+    </a>
+    <a class="week-day-card" href="#friday" style="border-color:rgba(240,192,64,0.3)">
+      <div class="wd-name">FRI</div>
+      <div class="wd-type">LONG DAY</div>
+      <div class="wd-wake" style="color:var(--red)">3:30</div>
+      <div class="wd-label">wake up</div>
+      <div class="wd-dots">
+        <div class="wd-dot" style="background:var(--accent3)"></div>
+        <div class="wd-dot" style="background:var(--accent5)"></div>
+        <div class="wd-dot" style="background:var(--accent)"></div>
+        <div class="wd-dot" style="background:var(--red)"></div>
+      </div>
+    </a>
+    <a class="week-day-card" href="#saturday" style="border-color:rgba(255,68,68,0.3)">
+      <div class="wd-name">SAT</div>
+      <div class="wd-type">TRAINING</div>
+      <div class="wd-wake" style="color:var(--accent3)">4:00</div>
+      <div class="wd-label">wake up</div>
+      <div class="wd-dots">
+        <div class="wd-dot" style="background:var(--accent3)"></div>
+        <div class="wd-dot" style="background:var(--accent5)"></div>
+        <div class="wd-dot" style="background:var(--accent)"></div>
+        <div class="wd-dot" style="background:var(--accent2)"></div>
+      </div>
+    </a>
+    <a class="week-day-card" href="#sunday" style="border-color:rgba(136,136,136,0.3)">
+      <div class="wd-name">SUN</div>
+      <div class="wd-type">RESET</div>
+      <div class="wd-wake" style="color:var(--accent2)">6:00</div>
+      <div class="wd-label">wake up</div>
+      <div class="wd-dots">
+        <div class="wd-dot" style="background:#888"></div>
+        <div class="wd-dot" style="background:var(--accent3)"></div>
+        <div class="wd-dot" style="background:var(--accent2)"></div>
+        <div class="wd-dot" style="background:var(--accent4)"></div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ════════════════ MONDAY ════════════════ -->
+<section class="section" id="monday">
+  <div class="section-label">§ 02 — Monday</div>
+  <div class="day-header">
+    <div class="day-badge" style="color:var(--accent2)">MON</div>
+    <div class="day-info">
+      <div class="day-type">Full Home Day — No College</div>
+      <div class="day-name" style="color:var(--accent2)">The Power Day</div>
+    </div>
+  </div>
+  <div class="day-stat-row">
+    <div class="day-stat">Wake: <span style="color:var(--accent2)">4:30 AM</span></div>
+    <div class="day-stat">Sleep: <span>10:00 PM</span></div>
+    <div class="day-stat">Android Dev: <span style="color:var(--accent2)">2.5 hrs prime + 1.5 hrs secondary</span></div>
+    <div class="day-stat">Academics: <span style="color:var(--accent4)">~6 hrs</span></div>
+  </div>
+
+  <div class="notice green">
+    <strong>Monday is your most valuable day.</strong> No commute, no college — pure output. This is when your Android roadmap makes its biggest weekly gains and your weakest academic subject gets serious attention. Do not waste it on YouTube or sleeping in.
+  </div>
+
+  <div class="timeline">
+    <div class="t-row t-sleep">
+      <div class="t-time">12:00 AM<br>—4:30 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Deep Sleep</div>
+        <div class="t-desc">Last recovery sleep before the week begins. Target 6.5 hrs from Sunday's 10 PM sleep. Do not compromise this block.</div>
+      </div>
+    </div>
+    <div class="t-row t-routine">
+      <div class="t-time">4:30<br>5:30 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Morning Routine</div>
+        <div class="t-desc">Brush, freshen up, drink water (500ml), pre-workout meal (banana + oats or whatever is available), mentally prepare for the day. No phone scrolling.</div>
+        <span class="t-tag tag-free">1 hr</span>
+      </div>
+    </div>
+    <div class="t-row t-workout">
+      <div class="t-time">5:30<br>6:30 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Workout — Bulking Phase</div>
+        <div class="t-desc">Full 1-hour session. No half-efforts. Monday is typically chest/push day in most splits — hit it hard. Post-workout: protein shake or eggs immediately after.</div>
+        <span class="t-tag tag-warn">Do NOT skip</span>
+      </div>
+    </div>
+    <div class="t-row t-meal">
+      <div class="t-time">6:30<br>7:00 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Shower + Post-Workout Breakfast</div>
+        <div class="t-desc">High protein breakfast. Shower. Get to your desk mentally fresh. This 30-min window is the transition between physical mode and cognitive mode.</div>
+      </div>
+    </div>
+    <div class="t-row t-android">
+      <div class="t-time">7:00<br>9:30 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">🤖 ANDROID / KOTLIN — PRIME BLOCK</div>
+        <div class="t-desc">
+          2.5 hours of deep, uninterrupted Android development. Phone on silent, door closed. Follow the weekly roadmap task exactly — no skipping ahead, no going back.
+          This is the block that builds your career. Treat it with the same seriousness as a corporate deadline.
+        </div>
+        <span class="t-tag tag-android">Roadmap Task</span>
+        <span class="t-tag tag-warn">No interruptions</span>
+      </div>
+    </div>
+    <div class="t-row t-meal">
+      <div class="t-time">9:30<br>9:45 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Short Break</div>
+        <div class="t-desc">Water, stretch, walk 2 minutes. No screens during break.</div>
+      </div>
+    </div>
+    <div class="t-row t-study">
+      <div class="t-time">9:45<br>11:45 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Deep Study — Block 1: DM or FLAT</div>
+        <div class="t-desc">
+          Rotate weekly: Week A → Discrete Mathematics (Schaum's Lipschutz). Week B → FLAT (Hopcroft).
+          2 hours focused theory — no shortcutting. Solve problems at end of each topic, not just read.
+        </div>
+        <span class="t-tag tag-study">2 hrs</span>
+        <span class="t-tag tag-college">DM / FLAT</span>
+      </div>
+    </div>
+    <div class="t-row t-study">
+      <div class="t-time">11:45 AM<br>12:45 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Deep Study — Block 2: DAA</div>
+        <div class="t-desc">
+          CLRS — focus on current week's algorithm design topic. Code the algorithm in your preferred language immediately after reading the theory.
+          Understanding + implementation in the same sitting.
+        </div>
+        <span class="t-tag tag-study">1 hr</span>
+        <span class="t-tag tag-college">DAA</span>
+      </div>
+    </div>
+    <div class="t-row t-meal">
+      <div class="t-time">12:45<br>1:45 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Lunch + Rest</div>
+        <div class="t-desc">Eat properly (you are bulking — calories matter). Rest for 20–30 min. Light nap if needed — set alarm. Do not let this stretch beyond 1 hour.</div>
+      </div>
+    </div>
+    <div class="t-row t-study">
+      <div class="t-time">1:45<br>3:45 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Deep Study — Block 3: CA or Biology</div>
+        <div class="t-desc">
+          Alternate: Week A → Computer Architecture (Patterson &amp; Hennessy). Week B → Biology (Campbell).
+          2 hours. CA is conceptual and heavy — draw diagrams. Biology is memory-heavy — make short notes and mnemonics.
+        </div>
+        <span class="t-tag tag-study">2 hrs</span>
+        <span class="t-tag tag-college">CA / Bio</span>
+      </div>
+    </div>
+    <div class="t-row t-study">
+      <div class="t-time">3:45<br>4:45 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">EVS + Assignment Buffer</div>
+        <div class="t-desc">
+          EVS (Masters) — 1 hour. This subject is 1L/week in college; do not neglect it. Any pending assignments or quiz prep also goes here.
+        </div>
+        <span class="t-tag tag-study">1 hr</span>
+        <span class="t-tag tag-college">EVS</span>
+      </div>
+    </div>
+    <div class="t-row t-android">
+      <div class="t-time">4:45<br>6:15 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">🤖 ANDROID — Secondary Block</div>
+        <div class="t-desc">
+          Continue from morning's work, or do related practice: build UI components, study Kotlin coroutines, read documentation, watch a focused tutorial (no rabbit holes).
+          This block is for consolidation and practice, not new territory.
+        </div>
+        <span class="t-tag tag-android">1.5 hrs</span>
+      </div>
+    </div>
+    <div class="t-row t-free">
+      <div class="t-time">6:15<br>7:30 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Personal Time</div>
+        <div class="t-desc">Family time, walk in Bongaon, personal errands, social media check (time-boxed). You earned this.</div>
+        <span class="t-tag tag-free">Protected</span>
+      </div>
+    </div>
+    <div class="t-row t-meal">
+      <div class="t-time">7:30<br>8:30 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Dinner + Relax</div>
+        <div class="t-desc">High-calorie dinner (bulking). Relax completely. No academic content during dinner.</div>
+      </div>
+    </div>
+    <div class="t-row t-study">
+      <div class="t-time">8:30<br>9:45 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Weekly Planning + Light Review</div>
+        <div class="t-desc">
+          Review what was studied today. Plan the week's Android roadmap targets. Set alarms for tomorrow (3:30 AM).
+          Pack no bag (no college tomorrow — wait, Tuesday is college). Pack bag for Tuesday.
+        </div>
+        <span class="t-tag tag-study">Revision</span>
+      </div>
+    </div>
+    <div class="t-row t-sleep">
+      <div class="t-time">10:00 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">LIGHTS OUT — 10:00 PM sharp</div>
+        <div class="t-desc">Phone on airplane mode. No exceptions. 3:30 AM alarm is set for Tuesday. This gives you 5.5 hours — your minimum viable sleep for a college day.</div>
+        <span class="t-tag tag-warn">Non-negotiable</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ TUESDAY ════════════════ -->
+<section class="section" id="tuesday">
+  <div class="section-label">§ 03 — Tuesday</div>
+  <div class="day-header">
+    <div class="day-badge" style="color:var(--accent)">TUE</div>
+    <div class="day-info">
+      <div class="day-type">College Day — 5 Subjects</div>
+      <div class="day-name" style="color:var(--accent)">The Full Load</div>
+    </div>
+  </div>
+  <div class="day-stat-row">
+    <div class="day-stat">Wake: <span style="color:var(--red)">3:30 AM</span></div>
+    <div class="day-stat">Leave: <span>5:45 AM</span></div>
+    <div class="day-stat">Return: <span>~8:00 PM</span></div>
+    <div class="day-stat">Subjects: <span style="color:var(--accent)">CA · DM · DAA · FLAT · Bio</span></div>
+  </div>
+
+  <div class="notice cyan">
+    Tuesday is the heaviest theory day — 5 subjects back to back. The train ride to college (7:30–9:10 AM) is your last prep window before class. Use it to read that day's first topic (CA or DM) — not to sleep.
+  </div>
+
+  <div class="timeline">
+    <div class="t-row t-sleep">
+      <div class="t-time">10:00 PM<br>—3:30 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Sleep</div><div class="t-desc">5.5 hours. Non-negotiable discipline: sleep at exactly 10 PM.</div></div>
+    </div>
+    <div class="t-row t-routine">
+      <div class="t-time">3:30<br>4:30 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Wake + Morning Routine</div>
+        <div class="t-desc">Alarm → immediately sit up, do not lie back. Brush, splash cold water, pre-workout food prep. No phone check beyond alarm off.</div>
+        <span class="t-tag tag-warn">No snooze. Ever.</span>
+      </div>
+    </div>
+    <div class="t-row t-workout">
+      <div class="t-time">4:30<br>5:30 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Workout — Bulking Phase</div>
+        <div class="t-desc">
+          Tuesday split (e.g., Back/Pull). Intensity must not drop because you're tired. The workout is PART OF THE PLAN — not optional.
+          Post-workout protein immediately after.
+        </div>
+        <span class="t-tag tag-warn">1 hr — Do it.</span>
+      </div>
+    </div>
+    <div class="t-row t-routine">
+      <div class="t-time">5:30<br>5:45 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Quick Prep — Bag + Clothes + Shake</div>
+        <div class="t-desc">15 minutes. Bag was packed previous night. Dress, grab protein/food, water bottle. Out the door at 5:45 — not 5:46.</div>
+        <span class="t-tag tag-warn">15 min hard cap</span>
+      </div>
+    </div>
+    <div class="t-row t-travel">
+      <div class="t-time">5:45<br>6:00 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Walk to Auto Stand</div>
+        <div class="t-desc">Board auto at 6:00 AM. If you miss it, the train is gone. No backup.</div>
+      </div>
+    </div>
+    <div class="t-row t-travel">
+      <div class="t-time">6:00<br>6:30 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Auto → Bongaon Station</div>
+        <div class="t-desc">Eat if you haven't. Drink water. Mentally transition from physical mode to academic mode.</div>
+        <span class="t-tag tag-travel">~30 min</span>
+      </div>
+    </div>
+    <div class="t-row t-study">
+      <div class="t-time">6:30<br>7:30 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Station Wait → Platform Study</div>
+        <div class="t-desc">
+          Reach station early. Use this 1-hour wait to study — DM theory or FLAT derivations. You're awake, alert, and in a quiet-ish environment.
+          Offline notes/book only (no app dependency).
+        </div>
+        <span class="t-tag tag-study">1 hr — USE IT</span>
+      </div>
+    </div>
+    <div class="t-row t-travel">
+      <div class="t-time">7:30<br>9:10 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">🚆 Bongaon–Sealdah Local — Study Mode</div>
+        <div class="t-desc">
+          Yes, it's crowded. Yes, you will be standing some days. Even then — hold the book, read it. You have 1.5–2 hours.
+          Use it for <strong>today's first 2 subjects</strong> (Tuesday = CA + DM). Read chapters, mark key points.
+          This is NOT the time to watch reels or listen to music.
+        </div>
+        <span class="t-tag tag-study">1.5–2 hrs reading</span>
+        <span class="t-tag tag-travel">Bongaon → Sealdah</span>
+      </div>
+    </div>
+    <div class="t-row t-travel">
+      <div class="t-time">9:10<br>9:40 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Sealdah → College</div>
+        <div class="t-desc">Bus/metro to BPPIMT. Quick mental recap of what you just read on the train. Be in your seat by 9:45 AM.</div>
+      </div>
+    </div>
+    <div class="t-row t-college">
+      <div class="t-time">9:45<br>10:40 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Computer Architecture (ADI)</div>
+        <div class="t-desc">
+          Pipelining, memory hierarchy, ILP. You already read this on the train — now it's reinforcement. Take structured notes, ask questions.
+          Patterson &amp; Hennessy is your backing text.
+        </div>
+        <span class="t-tag tag-college">PCC-CS402</span>
+      </div>
+    </div>
+    <div class="t-row t-college">
+      <div class="t-time">10:40<br>11:35 AM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Discrete Mathematics (JD)</div>
+        <div class="t-desc">Sets, Relations, Logic, Graphs. Schaum's Lipschutz is your companion. The class will make more sense if you pre-read even 1 page of the relevant section.</div>
+        <span class="t-tag tag-college">PCC-CS401</span>
+      </div>
+    </div>
+    <div class="t-row t-college">
+      <div class="t-time">11:35 AM<br>12:30 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Design &amp; Analysis of Algorithms (SK)</div>
+        <div class="t-desc">Greedy, DP, Graph algorithms. CLRS is your bible. Write pseudocode in margins. Understanding beats memorization here.</div>
+        <span class="t-tag tag-college">PCC-CS404</span>
+      </div>
+    </div>
+    <div class="t-row t-college">
+      <div class="t-time">12:30<br>1:25 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Formal Language &amp; Automata Theory (SRC)</div>
+        <div class="t-desc">DFA, NFA, CFG, PDA, TM. Hopcroft is the text. FLAT is logic-heavy — draw state diagrams in your notes. Do not just copy the board.</div>
+        <span class="t-tag tag-college">PCC-CS403</span>
+      </div>
+    </div>
+    <div class="t-row t-meal">
+      <div class="t-time">1:25<br>2:10 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Lunch Break</div>
+        <div class="t-desc">Eat a real meal — you are bulking. Caloric surplus requires actual food intake. Do not skip lunch here, it will hurt your evening energy.</div>
+      </div>
+    </div>
+    <div class="t-row t-college">
+      <div class="t-time">2:10<br>3:05 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Biology (SD)</div>
+        <div class="t-desc">Campbell Biology — genetics, metabolism, enzymes, molecular biology. Pay attention, take notes. This subject is memory-intensive; class is your best encoding opportunity.</div>
+        <span class="t-tag tag-college">BSC-401</span>
+      </div>
+    </div>
+    <div class="t-row t-free">
+      <div class="t-time">3:05<br>5:00 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Free / RC Period + Departure Prep</div>
+        <div class="t-desc">Use any free slot to review the day's notes briefly. Chat with classmates about concepts — peer explanation is powerful. Head to station ~4:30 PM.</div>
+        <span class="t-tag tag-free">Flexible</span>
+      </div>
+    </div>
+    <div class="t-row t-travel">
+      <div class="t-time">5:00<br>8:00 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">🚆 Return Journey — Active Study</div>
+        <div class="t-desc">
+          College → Sealdah → Train → Bongaon → Auto → Home (~3 hrs).
+          Train (Sealdah → Bongaon): Review today's notes. Do NOT go through new material — only today's class notes.
+          This cements the day's learning.
+        </div>
+        <span class="t-tag tag-study">Return review</span>
+        <span class="t-tag tag-travel">~3 hrs total</span>
+      </div>
+    </div>
+    <div class="t-row t-routine">
+      <div class="t-time">8:00<br>8:30 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Home — Freshen Up + Dinner</div>
+        <div class="t-desc">Shower, eat. No academic content during this window. Mental reset.</div>
+      </div>
+    </div>
+    <div class="t-row t-android">
+      <div class="t-time">8:30<br>9:30 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">🤖 ANDROID / KOTLIN — Evening Block</div>
+        <div class="t-desc">
+          1 hour. Not new features — this is for reviewing Monday's android work, reading official documentation, or doing small coding tasks.
+          If energy is low: just read Kotlin docs or architecture guides. Show up even if tired.
+        </div>
+        <span class="t-tag tag-android">1 hr</span>
+      </div>
+    </div>
+    <div class="t-row t-study">
+      <div class="t-time">9:30<br>10:00 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">DAA / FLAT Quick Problem Set</div>
+        <div class="t-desc">2–3 problems from today's class. No full theory — just practice. This is what cements the lab work for Thursday.</div>
+        <span class="t-tag tag-study">30 min</span>
+      </div>
+    </div>
+    <div class="t-row t-sleep">
+      <div class="t-time">10:00 PM</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">SLEEP — 10:00 PM</div>
+        <div class="t-desc">Bag packed for Wednesday. Phone on airplane mode. 5.5 hrs until 3:30 AM wake.</div>
+        <span class="t-tag tag-warn">Non-negotiable</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ WEDNESDAY ════════════════ -->
+<section class="section" id="wednesday">
+  <div class="section-label">§ 04 — Wednesday</div>
+  <div class="day-header">
+    <div class="day-badge" style="color:var(--accent3)">WED</div>
+    <div class="day-info">
+      <div class="day-type">College Day + Library</div>
+      <div class="day-name" style="color:var(--accent3)">Library Day Advantage</div>
+    </div>
+  </div>
+  <div class="day-stat-row">
+    <div class="day-stat">Wake: <span style="color:var(--red)">3:30 AM</span></div>
+    <div class="day-stat">Subjects: <span style="color:var(--accent)">EVS · CA · DAA · DM · Library</span></div>
+    <div class="day-stat">Special: <span style="color:var(--accent2)">Library slot — exploit it</span></div>
+  </div>
+
+  <div class="notice orange">
+    <strong>Wednesday has a Library slot after DM.</strong> This is gold. Use it to borrow reference books, solve past year question papers, or do silent focused reading that you can't do at home. Do not waste it on chatting.
+  </div>
+
+  <div class="timeline">
+    <div class="t-row t-sleep">
+      <div class="t-time">10 PM–3:30 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Sleep — 5.5 hrs</div><div class="t-desc">Same morning protocol as Tuesday. 3:30 AM, no snooze.</div></div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">3:30–4:30</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Morning Routine</div><div class="t-desc">Same as Tuesday. Hydrate, pre-workout fuel, no phone beyond alarm.</div></div>
+    </div>
+    <div class="t-row t-workout"><div class="t-time">4:30–5:30</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Workout — Bulking Phase</div>
+        <div class="t-desc">Wednesday split (e.g., Legs or Shoulders). Train hard — your physique goal is equally important as academics. Post-workout nutrition immediately.</div>
+        <span class="t-tag tag-warn">1 hr — no exceptions</span>
+      </div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">5:30–5:45</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Prep + Departure</div><div class="t-desc">15 min. Bag ready from last night.</div><span class="t-tag tag-warn">5:45 AM departure</span></div>
+    </div>
+    <div class="t-row t-travel"><div class="t-time">5:45–7:30</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Auto → Station</div><div class="t-desc">Platform wait: EVS reading (it's only 1L/week — consolidate on commute). EVS is small syllabus but full marks are possible.</div>
+      <span class="t-tag tag-study">EVS reading</span></div>
+    </div>
+    <div class="t-row t-travel"><div class="t-time">7:30–9:10</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🚆 Train — Study Mode</div>
+        <div class="t-desc">Today's focus: <strong>CA (pipelining, memory hierarchy)</strong> and <strong>DAA (current algorithm chapter)</strong>. Read notes from Tuesday's class first, then advance 1 topic.</div>
+        <span class="t-tag tag-study">CA + DAA</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">9:45–10:40</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Environmental Sciences (RH)</div>
+        <div class="t-desc">1L/week subject — attend fully, take compact notes. EVS questions in exams are direct from syllabus. One good sitting per week is enough if done properly.</div>
+        <span class="t-tag tag-college">MC-401</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">10:40–11:35</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Computer Architecture (ADI)</div>
+        <div class="t-desc">CA appears twice this week — Wednesday reinforces Tuesday's class. Ask the questions you had from yesterday's session. Clarify doubts while fresh.</div>
+        <span class="t-tag tag-college">PCC-CS402</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">11:35 AM–12:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Design &amp; Analysis of Algorithms (SK)</div>
+        <div class="t-desc">Second DAA class this week — you're building momentum on the algorithm design chapter. Write the recurrence relations in your notes immediately.</div>
+        <span class="t-tag tag-college">PCC-CS404</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">12:30–1:25 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Discrete Mathematics (JD)</div>
+        <div class="t-desc">DM second slot this week. Pay attention to proofs and graph theory — these will be in your mid-semester.</div>
+        <span class="t-tag tag-college">PCC-CS401</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">1:25–3:00 PM</div><div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">📚 LIBRARY SLOT — Exploit This</div>
+        <div class="t-desc">
+          Do NOT idle here. Priority list: (1) Collect past-year question papers for all 6 subjects, (2) Browse reference books for any topic you're stuck on,
+          (3) Sit in silence and solve 3–5 problems from your weakest subject. This is a free, quiet, resource-rich environment — a luxury you don't have at home.
+        </div>
+        <span class="t-tag tag-study">Past papers + Practice</span>
+        <span class="t-tag tag-warn">No wasted minutes</span>
+      </div>
+    </div>
+    <div class="t-row t-meal"><div class="t-time">3:00–3:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Late Lunch</div><div class="t-desc">Eat well. Wednesday is a heavy day — your body and brain both need fuel.</div></div>
+    </div>
+    <div class="t-row t-travel"><div class="t-time">4:00–8:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🚆 Return Journey</div>
+        <div class="t-desc">Return train: Review DM notes from today's class. DAA problems in the margins of your notes.</div>
+        <span class="t-tag tag-study">DM review</span>
+      </div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">8:00–8:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Home — Freshen Up + Dinner</div><div class="t-desc">Reset. Eat. Rest briefly.</div></div>
+    </div>
+    <div class="t-row t-android"><div class="t-time">8:30–9:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🤖 ANDROID — Evening Block</div>
+        <div class="t-desc">1 hour. Focus: read Android architecture or Kotlin advanced concepts. Code review of Monday's work. Document your progress in a text file.</div>
+        <span class="t-tag tag-android">1 hr</span>
+      </div>
+    </div>
+    <div class="t-row t-study"><div class="t-time">9:30–10:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">CA Quick Consolidation</div>
+        <div class="t-desc">10 minutes to write the 5 most important things from today's CA class. Then solve 1–2 memory hierarchy problems.</div>
+        <span class="t-tag tag-study">30 min</span>
+      </div>
+    </div>
+    <div class="t-row t-sleep"><div class="t-time">10:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">SLEEP — 10:00 PM</div><div class="t-desc">Bag ready for Thursday (lab day — bring lab manual). 5.5 hrs sleep.</div>
+        <span class="t-tag tag-warn">Non-negotiable</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ THURSDAY ════════════════ -->
+<section class="section" id="thursday">
+  <div class="section-label">§ 05 — Thursday</div>
+  <div class="day-header">
+    <div class="day-badge" style="color:var(--accent4)">THU</div>
+    <div class="day-info">
+      <div class="day-type">Lab Day — Practical Focus</div>
+      <div class="day-name" style="color:var(--accent4)">Build Day</div>
+    </div>
+  </div>
+  <div class="day-stat-row">
+    <div class="day-stat">Wake: <span style="color:var(--red)">3:30 AM</span></div>
+    <div class="day-stat">Labs: <span style="color:var(--accent4)">CA Lab (Group 1) / DAA Lab (Group 2)</span></div>
+    <div class="day-stat">Extra: <span style="color:var(--accent)">DAA + FLAT theory after labs</span></div>
+  </div>
+
+  <div class="notice" style="background:rgba(168,85,247,0.06); border-left:3px solid var(--accent4);">
+    <strong style="color:var(--accent4)">Lab days are the most valuable practical sessions.</strong> Show up prepared — know the experiment before you enter the lab.
+    The lab record must be completed before you leave or on the train home. No backlog allowed.
+  </div>
+
+  <div class="timeline">
+    <div class="t-row t-sleep"><div class="t-time">10 PM–3:30 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Sleep — 5.5 hrs</div></div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">3:30–4:30</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Morning Routine</div><div class="t-desc">Same protocol. Make sure lab manual is in your bag.</div></div>
+    </div>
+    <div class="t-row t-workout"><div class="t-time">4:30–5:30</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Workout — Bulking Phase</div>
+        <div class="t-desc">Thursday split (e.g., Arms or Push accessory). Keep it going — consistency beats intensity over time.</div>
+        <span class="t-tag tag-warn">1 hr</span>
+      </div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">5:30–5:45</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Prep + Departure</div><div class="t-desc">5:45 AM sharp. Lab manual, code notes, everything packed.</div></div>
+    </div>
+    <div class="t-row t-travel"><div class="t-time">5:45–7:30</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Auto → Station → Wait</div>
+        <div class="t-desc">Platform time: Read the experiment you'll be doing in today's lab. Know the algorithm/HDL code before entering the lab. Do not arrive unprepared.</div>
+        <span class="t-tag tag-study">Lab prep reading</span>
+      </div>
+    </div>
+    <div class="t-row t-travel"><div class="t-time">7:30–9:10</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🚆 Train — Lab Prep</div>
+        <div class="t-desc">Write the algorithm/pseudocode for today's DAA lab experiment in your lab notebook. Or review HDL syntax for CA lab. Arriving prepared = finishing faster = leaving early.</div>
+        <span class="t-tag tag-study">Lab notebook prep</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">9:30 AM–1:00 PM</div><div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">🔬 Lab Session — 4 hrs (C-101 or C-102)</div>
+        <div class="t-desc">
+          <strong>Group 1:</strong> Computer Architecture Lab (HDL programming — ALU, CPU, memory design)<br>
+          <strong>Group 2:</strong> Design &amp; Analysis of Algorithm Lab (sorting, graph algorithms, DP implementations)<br><br>
+          Show the viva answer. Write the lab record completely before leaving. Verify your output. Do not leave without getting signature.
+        </div>
+        <span class="t-tag tag-college">PCC-CS492 / PCC-CS494</span>
+        <span class="t-tag tag-warn">Complete record today</span>
+      </div>
+    </div>
+    <div class="t-row t-meal"><div class="t-time">1:00–1:45 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Lunch</div><div class="t-desc">Proper meal. You've been coding/building for 4 hours. Eat.</div></div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">1:45–2:40 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">DAA Theory (SK)</div>
+        <div class="t-desc">Third DAA class — this week's algorithm design pattern should be solid by now. Solve the example problems with the class.</div>
+        <span class="t-tag tag-college">PCC-CS404</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">2:40–3:35 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Formal Language &amp; Automata Theory (SRC)</div>
+        <div class="t-desc">Second FLAT class — Turing machines, undecidability, PDA. Draw diagrams. Ask about anything from Tuesday's FLAT that was unclear.</div>
+        <span class="t-tag tag-college">PCC-CS403</span>
+      </div>
+    </div>
+    <div class="t-row t-travel"><div class="t-time">4:00–8:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🚆 Return Journey</div>
+        <div class="t-desc">Return train: Continue lab record if incomplete. Then read DAA (CLRS) for the next experiment you'll be doing. Arrive home with lab record done.</div>
+        <span class="t-tag tag-study">Lab record completion</span>
+      </div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">8:00–8:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Home — Freshen Up + Dinner</div></div>
+    </div>
+    <div class="t-row t-android"><div class="t-time">8:30–9:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🤖 ANDROID — Evening Block</div>
+        <div class="t-desc">1 hour. Thursdays are cognitively heavy — keep Android work light. Review roadmap progress, read a docs page, or plan Friday's topic.</div>
+        <span class="t-tag tag-android">1 hr — light work</span>
+      </div>
+    </div>
+    <div class="t-row t-sleep"><div class="t-time">10:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">SLEEP — 10:00 PM</div><div class="t-desc">Friday is the longest day. You need everything you have. Sleep on time.</div>
+        <span class="t-tag tag-warn">Critical</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ FRIDAY ════════════════ -->
+<section class="section" id="friday">
+  <div class="section-label">§ 06 — Friday</div>
+  <div class="day-header">
+    <div class="day-badge" style="color:var(--accent5)">FRI</div>
+    <div class="day-info">
+      <div class="day-type">Longest College Day — Return 9 PM</div>
+      <div class="day-name" style="color:var(--accent5)">The Long Haul</div>
+    </div>
+  </div>
+  <div class="day-stat-row">
+    <div class="day-stat">Wake: <span style="color:var(--red)">3:30 AM</span></div>
+    <div class="day-stat">Return: <span style="color:var(--red)">~9:00 PM</span></div>
+    <div class="day-stat">Subjects: <span style="color:var(--accent)">FLAT · CA · DM · Bio + Lab</span></div>
+    <div class="day-stat">Sleep: <span style="color:var(--red)">4.5 hrs (hardest night)</span></div>
+  </div>
+
+  <div class="notice red">
+    <strong>Friday is the hardest day of the week.</strong> You'll be awake from 3:30 AM and won't be home until 9 PM — 17.5 hours. Evening study is limited to <strong>light revision only</strong>. No new topics, no Android dev tonight. Sleep as early as possible after dinner. This is the price of the schedule — accept it or break.
+  </div>
+
+  <div class="timeline">
+    <div class="t-row t-sleep"><div class="t-time">10 PM–3:30 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Sleep — 5.5 hrs</div><div class="t-desc">Most important night of the week to actually hit 10 PM sleep. Thursday's discipline enables Friday's endurance.</div></div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">3:30–4:30</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Morning Routine</div><div class="t-desc">Same protocol. On Fridays, pack extra food — it's a long day.</div></div>
+    </div>
+    <div class="t-row t-workout"><div class="t-time">4:30–5:30</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Workout — Bulking Phase</div>
+        <div class="t-desc">Friday split (e.g., Full body or weak point training). Hardest workout day to stay motivated. Do it anyway — this is where character is built.</div>
+        <span class="t-tag tag-warn">1 hr — especially on Fridays</span>
+      </div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">5:30–5:45</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Prep + Departure</div><div class="t-desc">Pack extra snacks. Departure 5:45 AM.</div></div>
+    </div>
+    <div class="t-row t-travel"><div class="t-time">5:45–9:10 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🚆 Auto → Station → Train → College</div>
+        <div class="t-desc">Train study: <strong>FLAT revision</strong> (state diagrams, grammar conversions) — Friday starts with FLAT. Warm up your brain on the train.</div>
+        <span class="t-tag tag-study">FLAT prep</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">9:45–10:40</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Formal Language &amp; Automata Theory (SRC)</div>
+        <div class="t-desc">Third FLAT class this week — push to clarify anything not understood from Tuesday/Thursday. Undecidability and Rice's theorem need special attention.</div>
+        <span class="t-tag tag-college">PCC-CS403</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">10:40–11:35</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Computer Architecture (ADI)</div>
+        <div class="t-desc">Third CA class — ILP, multiprocessor architectures. Ask about anything from Mon–Wed that was unclear. This is your last theory CA slot of the week.</div>
+        <span class="t-tag tag-college">PCC-CS402</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">11:35 AM–12:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Discrete Mathematics (JD)</div>
+        <div class="t-desc">Third DM class — Graphs and Trees week usually. Make sure you have the key theorems written down. DM has heavy theory in Unit 5.</div>
+        <span class="t-tag tag-college">PCC-CS401</span>
+      </div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">12:30–1:25 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Biology (SD)</div>
+        <div class="t-desc">Second Bio class — enzymes, metabolism, information transfer. Friday Bio is good because the week's rest has primed your brain. Take clean notes.</div>
+        <span class="t-tag tag-college">BSC-401</span>
+      </div>
+    </div>
+    <div class="t-row t-meal"><div class="t-time">1:25–2:10 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Lunch</div><div class="t-desc">Eat well. You have a 4-hr lab ahead of you.</div></div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">2:10–5:00 PM</div><div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">🔬 Lab Session — 3 hrs (opposite group)</div>
+        <div class="t-desc">
+          <strong>Group 1:</strong> DAA Lab (C-101) — implement this week's algorithm<br>
+          <strong>Group 2:</strong> CA Lab (C-102) — HDL design, CPU/memory<br><br>
+          Same rule: complete the record, get the signature. Do not leave the lab with incomplete work.
+        </div>
+        <span class="t-tag tag-college">Lab practical</span>
+        <span class="t-tag tag-warn">Record must be done</span>
+      </div>
+    </div>
+    <div class="t-row t-travel"><div class="t-time">5:00–9:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🚆 Long Return Journey — ~4 hrs</div>
+        <div class="t-desc">
+          You will be tired. That is normal. On the train: <strong>do not study new material.</strong> Close your eyes for 20 min first. Then, if energy remains, do light review of the week's key formulas or flashcards only.
+        </div>
+        <span class="t-tag tag-free">Rest first</span>
+        <span class="t-tag tag-study">Light review if energy allows</span>
+      </div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">9:00–9:45 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Home — Freshen Up + Dinner</div>
+        <div class="t-desc">Good meal. You survived the long haul. No Android, no new topics. Just eat and decompress.</div>
+      </div>
+    </div>
+    <div class="t-row t-study"><div class="t-time">9:45–10:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Light Review — Weekly Summary</div>
+        <div class="t-desc">What were the 3 most important things you learned this week? Write them down. What's pending? Note it. Plan Saturday briefly.</div>
+        <span class="t-tag tag-study">30–45 min max</span>
+      </div>
+    </div>
+    <div class="t-row t-sleep"><div class="t-time">11:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">SLEEP — Earliest Possible</div>
+        <div class="t-desc">Ideally by 10:30–11:00 PM. Saturday wake is 4:00 AM (6 hrs if 10 PM). This is your Friday — do not let it bleed into midnight.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ SATURDAY ════════════════ -->
+<section class="section" id="saturday">
+  <div class="section-label">§ 07 — Saturday</div>
+  <div class="day-header">
+    <div class="day-badge" style="color:var(--red)">SAT</div>
+    <div class="day-info">
+      <div class="day-type">2nd Year Training — Full Day</div>
+      <div class="day-name" style="color:var(--red)">Training Day + Early Sleep</div>
+    </div>
+  </div>
+  <div class="day-stat-row">
+    <div class="day-stat">Wake: <span style="color:var(--accent3)">4:00 AM</span></div>
+    <div class="day-stat">Return: <span>~7:00 PM</span></div>
+    <div class="day-stat">Priority: <span style="color:var(--accent2)">Early sleep for Sunday recovery</span></div>
+  </div>
+
+  <div class="notice orange">
+    Saturday is training day, not a study day. Attend fully, engage with the training content — 2nd year sessions build MAR points and networking. Return home, do 1 hour of Android review, eat well, and sleep by 9:30 PM for your Sunday recovery block.
+  </div>
+
+  <div class="timeline">
+    <div class="t-row t-sleep"><div class="t-time">11 PM–4:00 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Sleep — ~5–6 hrs</div></div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">4:00–5:00 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Morning Routine</div><div class="t-desc">Slightly relaxed start — 4 AM instead of 3:30 AM. Extra 30 min of sleep actually matters after Friday's long haul.</div></div>
+    </div>
+    <div class="t-row t-workout"><div class="t-time">5:00–6:00 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Workout — Bulking Phase</div>
+        <div class="t-desc">Saturday split — rest day alternative or light active recovery if your weekly split calls for it. Listen to your body but do not skip without cause.</div>
+      </div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">6:00–6:30 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Prep + Departure</div><div class="t-desc">Leave for training. Bring a notebook.</div></div>
+    </div>
+    <div class="t-row t-college"><div class="t-time">~9 AM–4 PM</div><div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">2nd Year Training</div>
+        <div class="t-desc">
+          Engage fully with the training. These sessions may include industry talks, workshops, or structured coursework.
+          <strong>Network with your batch — the friends you make here are your future interview referrals.</strong>
+          Note down anything relevant to your Android dev career path (software industry insights, CS fundamentals discussions).
+          This also builds MAR points — document attendance properly.
+        </div>
+        <span class="t-tag tag-college">MAR Points</span>
+        <span class="t-tag tag-warn">Attend fully</span>
+      </div>
+    </div>
+    <div class="t-row t-travel"><div class="t-time">4:00–7:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Return Journey</div>
+        <div class="t-desc">Rest on the train. You've been running hard all week. Earn the downtime.</div>
+        <span class="t-tag tag-free">Rest</span>
+      </div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">7:00–7:45 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Home — Dinner + Freshen Up</div><div class="t-desc">Big meal. You're bulking and you've had a long week. Your body needs nutrients for overnight recovery.</div></div>
+    </div>
+    <div class="t-row t-android"><div class="t-time">7:45–8:45 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🤖 ANDROID — Weekly Review</div>
+        <div class="t-desc">
+          Review what you built/learned in Android this week. Update your roadmap progress tracker. Note what's pending for next week's Monday block. No new coding — just review and plan.
+        </div>
+        <span class="t-tag tag-android">1 hr — review only</span>
+      </div>
+    </div>
+    <div class="t-row t-free"><div class="t-time">8:45–9:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Wind Down</div><div class="t-desc">Family time. No screens after 9:15 PM. Prepare for early sleep.</div></div>
+    </div>
+    <div class="t-row t-sleep"><div class="t-time">9:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">SLEEP — 9:30 PM SHARP</div>
+        <div class="t-desc">This gives you 8.5 hrs before Sunday 6:00 AM wake. This is your weekly biological reset. Do not sacrifice it for entertainment.</div>
+        <span class="t-tag tag-warn">MOST IMPORTANT SLEEP OF THE WEEK</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ SUNDAY ════════════════ -->
+<section class="section" id="sunday">
+  <div class="section-label">§ 08 — Sunday</div>
+  <div class="day-header">
+    <div class="day-badge" style="color:#888">SUN</div>
+    <div class="day-info">
+      <div class="day-type">Full Home Day — Recovery + Catch-Up</div>
+      <div class="day-name" style="color:#aaa">The Reset</div>
+    </div>
+  </div>
+  <div class="day-stat-row">
+    <div class="day-stat">Wake: <span style="color:var(--accent2)">6:00 AM (recovery)</span></div>
+    <div class="day-stat">Android Dev: <span style="color:var(--accent2)">2 hrs</span></div>
+    <div class="day-stat">Academics: <span style="color:var(--accent4)">~4 hrs</span></div>
+  </div>
+
+  <div class="notice green">
+    Sunday is the only day you can fully recover sleep, catch up on any missed topics, plan the next week, and do meaningful Android development. Do not use it as entertainment day. It is the foundation of the entire coming week.
+  </div>
+
+  <div class="timeline">
+    <div class="t-row t-sleep"><div class="t-time">9:30 PM–6 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Recovery Sleep — 8.5 hrs</div>
+        <div class="t-desc">This is where your muscle grows, memory consolidates, and brain resets. Do not cut this short. The whole week's sleep debt gets partially settled here.</div>
+        <span class="t-tag tag-warn">Protect at all costs</span>
+      </div>
+    </div>
+    <div class="t-row t-routine"><div class="t-time">6:00–7:00 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Relaxed Morning Routine</div>
+        <div class="t-desc">No rush. Proper breakfast. Tea/coffee if you want. No alarms beyond the 6 AM one. Ease into the day — your nervous system has earned it.</div>
+      </div>
+    </div>
+    <div class="t-row t-workout"><div class="t-time">7:00–8:00 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Workout — Bulking Phase</div>
+        <div class="t-desc">Sunday split — whatever your program says. Full rest from Saturday means you can push harder today. Post-workout meal: biggest of the week.</div>
+      </div>
+    </div>
+    <div class="t-row t-meal"><div class="t-time">8:00–9:00 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Shower + Proper Breakfast</div>
+        <div class="t-desc">High calorie breakfast — eggs, dal, rice, whatever. You need energy for the day's deep work. Take your time here.</div>
+      </div>
+    </div>
+    <div class="t-row t-android"><div class="t-time">9:00–11:00 AM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">🤖 ANDROID — Catch-Up + Advance Block</div>
+        <div class="t-desc">
+          2 hours. Sunday's Android block is for <strong>advancing the roadmap</strong>, not just review. If Monday's prime block was the core work, Sunday's block fills the gaps and pushes ahead.
+          Build a feature, study a pattern, implement something you read during the week.
+        </div>
+        <span class="t-tag tag-android">2 hrs — advance</span>
+      </div>
+    </div>
+    <div class="t-row t-study"><div class="t-time">11:00 AM–1:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Weakest Subject Deep Dive</div>
+        <div class="t-desc">Every week, identify your weakest performing subject from the week's classes. Sunday 11–1 is for that subject only. Go deep. Solve problems. This is where you prevent exam failure.</div>
+        <span class="t-tag tag-study">2 hrs — weak subject</span>
+      </div>
+    </div>
+    <div class="t-row t-meal"><div class="t-time">1:00–2:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Lunch + Rest</div><div class="t-desc">Good meal. Short rest — up to 30 min nap if needed.</div></div>
+    </div>
+    <div class="t-row t-study"><div class="t-time">2:00–4:00 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Lab Preparation — Next Week</div>
+        <div class="t-desc">
+          Look at next week's lab experiments (DAA Lab + CA Lab syllabus). Write pseudocode for DAA experiments. Review HDL syntax for CA. Arriving pre-prepared at labs earns better marks and finishes faster.
+        </div>
+        <span class="t-tag tag-study">Lab prep</span>
+        <span class="t-tag tag-college">DAA + CA Lab</span>
+      </div>
+    </div>
+    <div class="t-row t-free"><div class="t-time">4:00–5:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Personal Time + Family</div>
+        <div class="t-desc">Walk in Bongaon. Family time. Rest your brain. You have done enough today. This protected personal time is what makes the schedule sustainable long-term.</div>
+        <span class="t-tag tag-free">Earned rest</span>
+      </div>
+    </div>
+    <div class="t-row t-study"><div class="t-time">5:30–7:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Light Revision — Week in Review</div>
+        <div class="t-desc">
+          Not new topics. Review the week's notes across all 6 subjects — 15–20 min each. Identify what you clearly understand vs what needs more work. Write 3 open questions per subject.
+        </div>
+        <span class="t-tag tag-study">2 hrs — revision</span>
+      </div>
+    </div>
+    <div class="t-row t-meal"><div class="t-time">7:30–8:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Dinner + Relax</div><div class="t-desc">Big dinner. Bulk properly. No academics during dinner.</div></div>
+    </div>
+    <div class="t-row t-study"><div class="t-time">8:30–9:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">Weekly Planning for Monday</div>
+        <div class="t-desc">
+          Set Monday's Android roadmap task (exactly which task from the 20-week plan). Pack everything for the week. Set 4:30 AM alarm for Monday. Review Android roadmap progress.
+        </div>
+        <span class="t-tag tag-android">Planning</span>
+        <span class="t-tag tag-study">Week prep</span>
+      </div>
+    </div>
+    <div class="t-row t-sleep"><div class="t-time">9:30 PM</div><div class="t-dot"></div>
+      <div class="t-content"><div class="t-title">SLEEP — 9:30–10:00 PM</div>
+        <div class="t-desc">Monday wake is 4:30 AM. If you sleep at 10 PM you get 6.5 hrs. This is your baseline for the week — protect it.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ TRAIN PLAYBOOK ════════════════ -->
+<section class="section" id="train">
+  <div class="section-label">§ 09 — Strategy</div>
+  <div class="section-title">🚆 Train Time <span class="c">Playbook</span></div>
+  <p class="section-sub">You spend ~3–3.5 hrs on Bongaon–Sealdah trains every college day. That's 15+ hrs/week. Here is exactly how to use it.</p>
+
+  <div class="notice cyan">
+    <strong>Total train time per week: ~15–17 hours.</strong> If used for reading, that's the equivalent of 2 full extra days of study time. If wasted on Reels, that's your CGPA bleeding out every morning. The Bongaon local train is crowded, loud, and uncomfortable. <strong>None of those are excuses.</strong>
+  </div>
+
+  <div class="train-grid">
+    <div class="train-card do">
+      <div class="tc-icon">✅</div>
+      <div class="tc-title">DO on the Morning Train</div>
+      <ul class="tc-items">
+        <li>Read today's first subject theory (pre-warm for class)</li>
+        <li>Review yesterday's notes — 10-minute refresh per subject</li>
+        <li>Work through derivations and proofs on paper</li>
+        <li>Write pseudocode for today's lab experiment in your notebook</li>
+        <li>Read FLAT state diagram problems — no internet needed</li>
+        <li>Memorize Biology definitions and mnemonics</li>
+        <li>Review DM proofs — induction, combinatorics</li>
+        <li>Study EVS — complete syllabus fits in 2 train rides</li>
+      </ul>
+    </div>
+    <div class="train-card dont">
+      <div class="tc-icon">🚫</div>
+      <div class="tc-title">NEVER on the Train</div>
+      <ul class="tc-items">
+        <li>Short-form video (Reels, YouTube Shorts, TikTok)</li>
+        <li>Passive music listening for more than 10 min</li>
+        <li>Social media browsing (Instagram, WhatsApp group chats)</li>
+        <li>Sleeping past 20 minutes on morning train</li>
+        <li>Online shopping or irrelevant browsing</li>
+        <li>New Android coding (no laptop, no IDE, no point)</li>
+        <li>Starting new topics you can't finish in one sitting</li>
+      </ul>
+    </div>
+    <div class="train-card strategy">
+      <div class="tc-icon">📐</div>
+      <div class="tc-title">Crowd Strategy</div>
+      <ul class="tc-items">
+        <li>Standing? Hold book with one hand, read vertically</li>
+        <li>No seat? Use the door-side pole — stable position to read</li>
+        <li>Too loud? Mental recitation — read text, close book, recall</li>
+        <li>Evening train = review only, never new material</li>
+        <li>First 10 min of any train ride: closed eyes, recall last topic</li>
+        <li>Earphones allowed: only lecture audio (no music)</li>
+        <li>Print condensed notes — physical pages beat phone screen always</li>
+      </ul>
+    </div>
+    <div class="train-card strategy" style="border-color:rgba(168,85,247,0.3)">
+      <div class="tc-icon">📅</div>
+      <div class="tc-title">Day-by-Day Train Assignment</div>
+      <ul class="tc-items" style="--before-color:var(--accent4)">
+        <li><strong>Tuesday morning:</strong> CA theory + DM pre-read</li>
+        <li><strong>Tuesday evening:</strong> Review day's notes</li>
+        <li><strong>Wednesday morning:</strong> EVS reading + DAA</li>
+        <li><strong>Wednesday evening:</strong> DM problem review</li>
+        <li><strong>Thursday morning:</strong> Lab experiment prep</li>
+        <li><strong>Thursday evening:</strong> Complete lab record</li>
+        <li><strong>Friday morning:</strong> FLAT revision</li>
+        <li><strong>Friday evening:</strong> Rest first, then light review</li>
+        <li><strong>Saturday morning:</strong> Biology mnemonics</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ WEEKLY BUDGET ════════════════ -->
+<section class="section" id="budget">
+  <div class="section-label">§ 10 — Academic</div>
+  <div class="section-title">Weekly Study <span class="p">Budget</span></div>
+  <p class="section-sub">Hours per subject allocated per week across all study windows (train, home, library, Sunday).</p>
+
+  <div class="budget-grid">
+    <div class="budget-card">
+      <div class="bc-top">
+        <div>
+          <div class="bc-subj">Discrete Mathematics</div>
+          <div class="bc-code">PCC-CS401 · 3L+1T · 4 credits</div>
+        </div>
+        <div class="bc-hours">~6h</div>
+      </div>
+      <div class="bc-bar-bg"><div class="bc-bar-fill" style="width:85%; background:linear-gradient(90deg,var(--accent),var(--accent2));"></div></div>
+      <ul class="bc-items">
+        <li>3 classes/week + 1 tutorial = attend all</li>
+        <li>Monday: 2-hr deep block (Lipschutz)</li>
+        <li>Train (Tue + Wed): pre-read + review</li>
+        <li>Sunday: 30 min problem set</li>
+        <li>Focus: Proofs, Graph Theory (heavy in exams)</li>
+      </ul>
+    </div>
+    <div class="budget-card">
+      <div class="bc-top">
+        <div>
+          <div class="bc-subj">Computer Architecture</div>
+          <div class="bc-code">PCC-CS402 · 3L · 3 credits</div>
+        </div>
+        <div class="bc-hours">~5h</div>
+      </div>
+      <div class="bc-bar-bg"><div class="bc-bar-fill" style="width:70%; background:linear-gradient(90deg,var(--accent3),var(--accent5));"></div></div>
+      <ul class="bc-items">
+        <li>3 classes + lab = full attendance required</li>
+        <li>Monday: 2-hr alternating block (Patterson)</li>
+        <li>Train (Tue morning): pre-read pipeline chapter</li>
+        <li>Lab: HDL pre-prep on Thursday train</li>
+        <li>Focus: Pipelining, Cache, ILP (exam-heavy)</li>
+      </ul>
+    </div>
+    <div class="budget-card">
+      <div class="bc-top">
+        <div>
+          <div class="bc-subj">FLAT</div>
+          <div class="bc-code">PCC-CS403 · 3L · 3 credits</div>
+        </div>
+        <div class="bc-hours">~5h</div>
+      </div>
+      <div class="bc-bar-bg"><div class="bc-bar-fill" style="width:70%; background:linear-gradient(90deg,var(--accent4),var(--accent));"></div></div>
+      <ul class="bc-items">
+        <li>3 classes/week — attend every single one</li>
+        <li>Monday: 2-hr alternating block (Hopcroft)</li>
+        <li>Train (Fri morning): FLAT revision</li>
+        <li>Draw state diagrams by hand — always</li>
+        <li>Focus: DFA/NFA conversions, CFG, TM decidability</li>
+      </ul>
+    </div>
+    <div class="budget-card">
+      <div class="bc-top">
+        <div>
+          <div class="bc-subj">Design &amp; Analysis of Algorithms</div>
+          <div class="bc-code">PCC-CS404 · 3L · 3 credits</div>
+        </div>
+        <div class="bc-hours">~6h</div>
+      </div>
+      <div class="bc-bar-bg"><div class="bc-bar-fill" style="width:85%; background:linear-gradient(90deg,var(--accent2),var(--accent5));"></div></div>
+      <ul class="bc-items">
+        <li>3 classes + lab = most intensive subject</li>
+        <li>Monday: 1-hr dedicated block (CLRS)</li>
+        <li>Always code the algorithm after reading it</li>
+        <li>Lab prep every Sunday (2 hrs)</li>
+        <li>Focus: Greedy, DP, NP-completeness, complexity</li>
+      </ul>
+    </div>
+    <div class="budget-card">
+      <div class="bc-top">
+        <div>
+          <div class="bc-subj">Biology</div>
+          <div class="bc-code">BSC-401 · 2L+1T · 3 credits</div>
+        </div>
+        <div class="bc-hours">~3h</div>
+      </div>
+      <div class="bc-bar-bg"><div class="bc-bar-fill" style="width:42%; background:linear-gradient(90deg,#2a8a2a,#6a4a8a);"></div></div>
+      <ul class="bc-items">
+        <li>2 classes/week — attend, take notes</li>
+        <li>Monday: 2-hr alternating block (Campbell)</li>
+        <li>Train (Sat morning): Biology mnemonics</li>
+        <li>Memory-intensive — flashcards work well here</li>
+        <li>Focus: Genetics, Metabolism, Molecular Biology</li>
+      </ul>
+    </div>
+    <div class="budget-card">
+      <div class="bc-top">
+        <div>
+          <div class="bc-subj">Environmental Sciences</div>
+          <div class="bc-code">MC-401 · 1L · 1 credit</div>
+        </div>
+        <div class="bc-hours">~2h</div>
+      </div>
+      <div class="bc-bar-bg"><div class="bc-bar-fill" style="width:28%; background:linear-gradient(90deg,#2a5a3a,#3a8a4a);"></div></div>
+      <ul class="bc-items">
+        <li>1 class/week — every class counts more</li>
+        <li>Monday: 1-hr EVS block (Masters)</li>
+        <li>Train (Wed morning): complete EVS reading</li>
+        <li>Small syllabus — full marks are achievable</li>
+        <li>Focus: Pollution, ecosystem, water treatment</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ ANDROID DEV ════════════════ -->
+<section class="section" id="android">
+  <div class="section-label">§ 11 — Roadmap</div>
+  <div class="section-title">🤖 Android Dev <span class="g">Integration</span></div>
+  <p class="section-sub">How the 20-week Android/Kotlin roadmap fits into this weekly structure — and how to protect it.</p>
+
+  <div class="notice green">
+    <strong>Total Android dev time this schedule allocates: ~9 hrs/week</strong> (Mon 2.5 + Mon secondary 1.5 + Tue 1 + Wed 1 + Thu 1 + Sat review 1 + Sun 2). The minimum viable is <strong>7 hrs/week</strong> — below that the 20-week roadmap falls behind. The blocks on Tue/Wed/Thu evenings are small but they keep the habit alive. Monday and Sunday are where real progress happens.
+  </div>
+
+  <div class="reality-grid" style="grid-template-columns:1fr 1fr;">
+    <div class="reality-card">
+      <div class="rc-label">Weekly Android Block Breakdown</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent2)">Mon 7:00–9:30</span> Prime block — new roadmap task (2.5 hrs)</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent2)">Mon 4:45–6:15</span> Secondary block — practice/docs (1.5 hrs)</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent2)">Tue 8:30–9:30</span> Evening review — docs/architecture (1 hr)</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent2)">Wed 8:30–9:30</span> Evening review — Kotlin/docs (1 hr)</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent2)">Thu 8:30–9:30</span> Light — roadmap check/planning (1 hr)</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent2)">Sat 7:45–8:45</span> Weekly review — progress log (1 hr)</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent2)">Sun 9:00–11:00</span> Advance block — catch-up/push ahead (2 hrs)</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent3)">TOTAL</span><strong>~10 hrs/week</strong></div>
+    </div>
+    <div class="reality-card">
+      <div class="rc-label">Rules for the Android Blocks</div>
+      <div class="rc-item"><span class="key">Monday AM</span> ONLY the current week's roadmap task — no random exploration</div>
+      <div class="rc-item"><span class="key">Evening blocks</span> Never start a new feature — continue or review only</div>
+      <div class="rc-item"><span class="key">If tired</span> Read docs or architecture articles — still counts</div>
+      <div class="rc-item"><span class="key">Progress log</span> Update weekly on Saturday. No log = no accountability</div>
+      <div class="rc-item"><span class="key">Phone</span> Can be used for Kotlin Playground during commute if not heavy coding</div>
+      <div class="rc-item"><span class="key">Skips</span> Max 1 evening skip per week — must compensate on Sunday</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ LAWS ════════════════ -->
+<section class="section" id="laws">
+  <div class="section-label">§ 12 — Non-Negotiables</div>
+  <div class="section-title">Laws &amp; <span class="r">Warnings</span></div>
+  <p class="section-sub">These are not suggestions. These are the rules this schedule runs on. Break them and the system breaks.</p>
+
+  <div class="laws-grid">
+    <div class="law-card danger">
+      <div class="law-num">LAW 01 · CRITICAL</div>
+      <div class="law-title">3:30 AM is 3:30 AM</div>
+      <div class="law-body">There is no version of this schedule where the 3:30 AM alarm is optional. Miss it → miss workout → miss train → miss first class → cascade failure. Install a separate alarm device. Tell a family member to wake you if needed. No snooze protocol means <strong>first alarm = up, feet on floor.</strong> Staying horizontal after the alarm is the most dangerous action you can take.</div>
+    </div>
+    <div class="law-card danger">
+      <div class="law-num">LAW 02 · CRITICAL</div>
+      <div class="law-title">5:45 AM is Zero-Tolerance</div>
+      <div class="law-body">Missing the 6:00 AM auto means missing the 7:30 AM train. There is no next train that gets you to college on time for 9:45 AM. Pack your bag the night before — every night. Clothes laid out the night before. No decisions in the morning. <strong>Morning is execution only.</strong></div>
+    </div>
+    <div class="law-card danger">
+      <div class="law-num">LAW 03 · SLEEP</div>
+      <div class="law-title">Sleep Debt is a Real Debt</div>
+      <div class="law-body">Running on 5 hrs/night for 5 days straight impairs memory, muscle recovery, and decision-making — all three of which you need simultaneously. You are allowed exactly <strong>one bad sleep night per week</strong> (Friday). All other nights, target 10 PM lights out. Sunday 8.5 hrs is the weekly repayment. Without it, you will burn out by week 6.</div>
+    </div>
+    <div class="law-card danger">
+      <div class="law-num">LAW 04 · PHONE</div>
+      <div class="law-title">Phone Reels Will Steal Your Career</div>
+      <div class="law-body">You have approximately 15 mins of discretionary mobile time in the morning before departure. Every minute on Reels or Instagram is directly subtracted from your workout, your train study, or your sleep. <strong>Airplane mode from 10 PM to 6 AM, always.</strong> Reels during commute = dead time. 30 minutes of daily Reels = 3.5 hrs/week = the equivalent of your entire Sunday Android block, gone.</div>
+    </div>
+    <div class="law-card safe">
+      <div class="law-num">LAW 05 · WORKOUT</div>
+      <div class="law-title">Workout Feeds the Schedule, Not Fights It</div>
+      <div class="law-body">You are in a bulking phase. Skipping workouts does not save time — it costs you. Compound lifts at 4:30 AM raise testosterone, sharpen focus, and set a physiological "on" signal for the rest of the day. <strong>The train study window is MORE effective after a morning workout</strong> than after just waking up. Do not skip unless actually injured.</div>
+    </div>
+    <div class="law-card safe">
+      <div class="law-num">LAW 06 · RESOURCES</div>
+      <div class="law-title">One Resource Per Subject — Always</div>
+      <div class="law-body">Lipschutz for DM. Hopcroft for FLAT. CLRS for DAA. Patterson for CA. Campbell for Bio. Masters for EVS. That is it. Finding a "better" YouTube channel or a "more detailed" PDF is procrastination disguised as preparation. <strong>The resource is not the bottleneck. Doing the work is.</strong></div>
+    </div>
+    <div class="law-card safe">
+      <div class="law-num">LAW 07 · ANDROID</div>
+      <div class="law-title">Android Dev is Not Optional</div>
+      <div class="law-body">The Monday 7:00–9:30 AM block and Sunday 9:00–11:00 AM block are the engine of your career. Every week you skip the Android roadmap is a week you fall behind the version of yourself who didn't skip. College academics get you the degree. <strong>Android dev gets you the job.</strong> Both must run simultaneously — no sacrificing one for the other.</div>
+    </div>
+    <div class="law-card safe">
+      <div class="law-num">LAW 08 · LABS</div>
+      <div class="law-title">Lab Records Must Be Done Same Day</div>
+      <div class="law-body">Every Thursday and Friday lab session: the record must be <strong>completed and signed before leaving college</strong> or completed on the return train. Lab backlogs compound — you cannot write 3 records the night before submission. Arriving pre-prepared (pseudocode written on train) means finishing 45 minutes faster in the lab.</div>
+    </div>
+    <div class="law-card info">
+      <div class="law-num">TIP 01 · ENERGY</div>
+      <div class="law-title">Manage Energy, Not Just Time</div>
+      <div class="law-body">Your hardest cognitive work (Android dev, DAA proofs, FLAT derivations) goes in your freshest slots — <strong>Monday morning, Sunday morning, train going TO college.</strong> Easy work (EVS reading, Bio mnemonics, note review) goes in tired slots — return train, Friday evening. Misaligning this (doing hard work when tired) is the number one reason schedules fail.</div>
+    </div>
+    <div class="law-card info">
+      <div class="law-num">TIP 02 · LIBRARY</div>
+      <div class="law-title">Wednesday Library = Past Papers</div>
+      <div class="law-body">The single highest-ROI activity for MAKAUT exams is solving past year question papers. <strong>Wednesday's library slot is exclusively for past papers</strong> — not casual reading, not chatting, not sleeping on the desk. Ask the librarian for MAKAUT CSE past papers. Photocopy if possible. Questions repeat significantly across years.</div>
+    </div>
+    <div class="law-card info">
+      <div class="law-num">TIP 03 · MAR</div>
+      <div class="law-title">Document MAR Points Every Week</div>
+      <div class="law-body">Saturday training, magazine contributions, seminars, fresher's events — all go into your MAR documentation immediately. Do not wait for the end of semester. Saturday evening (8:45 PM wind-down slot) takes 5 minutes to update your MAR log file. <strong>Missing documentation = missing points = degree risk.</strong> Also set a June 2026 reminder for NPTEL enrollment.</div>
+    </div>
+    <div class="law-card info">
+      <div class="law-num">TIP 04 · CGPA</div>
+      <div class="law-title">8+ CGPA Requires Early Midsem Prep</div>
+      <div class="law-body">MAKAUT midsem exams cover the first 3 units. Your weekly study budget already covers these topics — but 4 weeks before midsem, the Sunday "weak subject deep dive" slot should shift entirely to <strong>midsem problem solving</strong> using past papers from the library. The schedule does not need to change — just the content within the Sunday slot.</div>
+    </div>
+    <div class="law-card danger">
+      <div class="law-num">WARNING 01</div>
+      <div class="law-title">Friday Evening is Not a Study Night</div>
+      <div class="law-body">You will return home at 9 PM after being awake since 3:30 AM — 17.5 hours. Attempting serious study at that point is not discipline, it's self-sabotage. Light review (30 min) is the maximum. Anything more than that <strong>reduces the quality of your Saturday training and Sunday recovery.</strong> Respect your biology.</div>
+    </div>
+    <div class="law-card danger">
+      <div class="law-num">WARNING 02</div>
+      <div class="law-title">The Schedule Breaks If Sunday Breaks</div>
+      <div class="law-body">Sunday is load-bearing. It holds the recovery sleep, the Android advance block, the lab prep, and the weak-subject dive. If Sunday becomes entertainment day — watching 4 hours of content, sleeping until noon — the entire coming week degrades. <strong>The week is won or lost on Sunday.</strong></div>
+    </div>
+    <div class="law-card danger">
+      <div class="law-num">WARNING 03</div>
+      <div class="law-title">Bulking Without Sleep = Fat, Not Muscle</div>
+      <div class="law-body">This is a direct physiological warning: caloric surplus with insufficient sleep results in disproportionate fat gain because testosterone drops and cortisol rises on sleep deprivation. <strong>Your bulk will not work if your sleep is under 5 hrs for extended periods.</strong> Sunday's 8.5-hr sleep is not optional for your physique goals — it's mandatory.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ FOOD ════════════════ -->
+<section class="section" id="food">
+  <div class="section-label">§ 14 — Nutrition</div>
+  <div class="section-title">🍱 Bulking <span class="o">Food Plan</span></div>
+  <p class="section-sub">Designed for a 17.5-hour college day. Every meal has a time, a purpose, and a calorie target. No gap longer than 2.5 hours without eating.</p>
+
+  <div class="notice orange">
+    <strong>Your old problem:</strong> After lunch at ~1 PM — nothing until dinner at 8:30 PM. That's a 7+ hour gap while your body is doing labs, standing in a packed train, and trying to recover from a 4:30 AM workout. You were eating to survive, not to grow. <strong>This plan fixes that entirely.</strong>
+  </div>
+
+  <!-- MEAL TIMELINE -->
+  <div class="timeline" style="margin-top:32px;">
+
+    <div class="t-row t-workout">
+      <div class="t-time">5:00 AM<br>Pre-Workout</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Sattu Shake — Keep Exactly As Is</div>
+        <div class="t-desc">50g sattu + 3 dates + 1 banana + 250ml full-fat milk. Blend or shake well. Drink immediately before workout begins.</div>
+        <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--accent2);">~450 cal</span>
+          <span style="font-size:10px;color:var(--text-dim);">~15g protein</span>
+          <span style="font-size:10px;color:var(--text-dim);">~80g carbs</span>
+          <span class="t-tag tag-warn">Never skip — this fuels the workout</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row t-meal">
+      <div class="t-time">5:30 AM<br>Post-Workout</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Post-Workout Recovery — At Home Before Leaving</div>
+        <div class="t-desc">2 boiled eggs (cook night before) + 2 slices bread with peanut butter OR 30g peanuts. 5 minutes to eat. This is the anabolic window — your muscles need protein within 30 min of workout.</div>
+        <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--accent2);">~300 cal</span>
+          <span style="font-size:10px;color:var(--text-dim);">~18g protein</span>
+          <span class="t-tag tag-warn">Critical for muscle growth</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row t-travel">
+      <div class="t-time">~8:00 AM<br>Train</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">On the Train — Carry from Home</div>
+        <div class="t-desc">1 banana + 30g almonds (pre-portioned in your pouch from night before). Eat while standing or sitting. No mess, no smell, fits in pocket.</div>
+        <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--accent2);">~270 cal</span>
+          <span style="font-size:10px;color:var(--text-dim);">~6g protein</span>
+          <span style="font-size:10px;color:var(--text-dim);">~10g healthy fat</span>
+          <span class="t-tag tag-travel">Eat between Bongaon–Sealdah</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row t-college">
+      <div class="t-time">~9:30 AM<br>Before Class</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Before Entering Classroom — Your Current "Breakfast"</div>
+        <div class="t-desc">2 boiled eggs + 2 bananas. Keep this exactly as it is — it just moves from being your first meal of the day to your third. By now your body has been fed consistently since 5 AM.</div>
+        <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--accent2);">~350 cal</span>
+          <span style="font-size:10px;color:var(--text-dim);">~14g protein</span>
+          <span class="t-tag tag-college">Carry boiled eggs from home</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row t-meal">
+      <div class="t-time">~1:00 PM<br>Lunch</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Lunch — Rice + Egg Curry (Pack Generously)</div>
+        <div class="t-desc">This is your anchor meal. Pack MORE than you think you need — one small tiffin of rice is not enough for a bulking person doing this schedule. Target a large portion. Add extra egg in the curry if possible.</div>
+        <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--accent2);">~700–800 cal</span>
+          <span style="font-size:10px;color:var(--text-dim);">~25g protein</span>
+          <span class="t-tag tag-warn">Do NOT pack small portions</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row t-routine">
+      <div class="t-time">~3:30–4:00 PM<br>Afternoon</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Between Classes / Before Lab — THE GAP KILLER</div>
+        <div class="t-desc">30g almonds + 1 banana. This is the slot you were completely skipping before. Eat this between classes or just before the afternoon lab session starts. This prevents the 7-hour crash entirely.</div>
+        <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--accent2);">~270 cal</span>
+          <span style="font-size:10px;color:var(--text-dim);">~6g protein</span>
+          <span style="font-size:10px;color:var(--accent3);">⚡ This was your missing meal</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row t-travel">
+      <div class="t-time">~6:30 PM<br>Return Train</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">On the Return Train — Carry from College</div>
+        <div class="t-desc">1–2 bananas. You're tired, blood sugar is dropping, still 1+ hour of travel left. Banana prevents you from arriving home completely crashed and skipping dinner.</div>
+        <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--accent2);">~180–200 cal</span>
+          <span class="t-tag tag-travel">Easy to eat standing</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row t-meal">
+      <div class="t-time">~8:30 PM<br>Dinner</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Dinner — Whatever Mother Cooks + Extra</div>
+        <div class="t-desc">Dal-rice, roti-sabzi, fish curry — all excellent for bulking. Eat a large portion. If the meal feels light on protein, add 2 extra boiled eggs on the side. Dal + rice + 2 eggs is a complete bulk meal.</div>
+        <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--accent2);">~700–800 cal</span>
+          <span style="font-size:10px;color:var(--text-dim);">~25–30g protein</span>
+          <span class="t-tag tag-warn">Eat large — second anchor meal</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-row t-sleep">
+      <div class="t-time">~9:45 PM<br>Before Sleep</div>
+      <div class="t-dot"></div>
+      <div class="t-content">
+        <div class="t-title">Before Sleep — Milk</div>
+        <div class="t-desc">250ml full-fat milk. Casein protein — slow digesting, feeds your muscles for 6–7 hours while you sleep. Cheapest overnight recovery tool that exists.</div>
+        <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--accent2);">~150 cal</span>
+          <span style="font-size:10px;color:var(--text-dim);">~8g protein</span>
+          <span class="t-tag tag-android">Overnight muscle fuel</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY TOTALS -->
+  <div class="divider"></div>
+  <div class="section-label" style="margin-top:0;">Daily Summary</div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:16px;">
+    <div class="reality-card">
+      <div class="rc-label">Total Daily Calories</div>
+      <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--accent2);text-shadow:var(--glow-green);margin:8px 0;">~3,300</div>
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.8;">
+        This is a real bulking surplus for your activity level (4:30 AM workout + 3.5 hrs commute daily). Old routine was roughly ~1,800–2,000 cal — you were in a deficit on a bulk. That ends now.
+      </div>
+    </div>
+    <div class="reality-card">
+      <div class="rc-label">Total Daily Protein</div>
+      <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--accent);text-shadow:var(--glow);margin:8px 0;">~110g</div>
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.8;">
+        Distributed across 8 eating windows — not dumped into one meal. This is what actually gets absorbed and used for muscle protein synthesis. Spread = better gains.
+      </div>
+    </div>
+    <div class="reality-card">
+      <div class="rc-label">Longest Gap Between Meals</div>
+      <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--accent3);margin:8px 0;">2.5 hrs</div>
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.8;">
+        Previously: 7+ hours (1 PM to 8:30 PM). Now: maximum 2.5 hours between any two meals. Your body stays in an anabolic fed state throughout the entire day.
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT TO CARRY -->
+  <div class="divider"></div>
+  <div class="section-label" style="margin-top:0;">Night-Before Pack List</div>
+  <p style="font-size:11px;color:var(--text-dim);margin-bottom:20px;">Every college day evening, pack these in 3 minutes. Everything is pre-portioned so morning is just grab-and-go.</p>
+
+  <div class="reality-grid">
+    <div class="reality-card">
+      <div class="rc-label">Bag Pack — Every College Night</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent3);">Tiffin Box</span> Rice + egg curry — pack generously, not a small portion</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent3);">4 Boiled Eggs</span> Boil 4 the night before (2 post-workout at home, 2 before class)</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent3);">4 Bananas</span> 1 in shake, 1 on train going, 1 before class, 1–2 on return train</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent3);">60g Almonds</span> Pre-portioned: 30g pouch for train, 30g pouch for afternoon</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent3);">Water Bottle</span> 1L minimum. Hydration affects performance more than most supplements.</div>
+      <div class="rc-item"><span class="key" style="color:var(--accent3);">Sattu Pouch</span> If making shake fresh — or make it night before and carry in a bottle</div>
+    </div>
+    <div class="reality-card">
+      <div class="rc-label">What Stays at Home (No Need to Carry)</div>
+      <div class="rc-item"><span class="key" style="color:var(--text-dim);">Milk</span> Pre-workout shake + bedtime glass — both at home</div>
+      <div class="rc-item"><span class="key" style="color:var(--text-dim);">Peanut Butter</span> Post-workout bread at home — no need to carry</div>
+      <div class="rc-item"><span class="key" style="color:var(--text-dim);">Dinner</span> Home-cooked — never carry dinner separately</div>
+      <div class="rc-item"><span class="key" style="color:var(--text-dim);">Dates</span> Only needed for sattu shake — stays at home</div>
+    </div>
+  </div>
+
+  <!-- MASTER DAILY LIST -->
+  <div class="divider"></div>
+  <div class="section-label" style="margin-top:0;">Master Daily Food List — What You Eat, How Much</div>
+  <p style="font-size:11px;color:var(--text-dim);margin-bottom:20px;">Print this or screenshot it. Every single day on a college day, this is your food list.</p>
+
+  <table class="classes-table" style="margin-top:0;">
+    <thead>
+      <tr>
+        <th>Food Item</th>
+        <th>Daily Qty</th>
+        <th>When</th>
+        <th>Approx Cal</th>
+        <th>Why</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="subj">Sattu</span></td>
+        <td>50g</td>
+        <td>5:00 AM shake</td>
+        <td>~180 cal</td>
+        <td class="tip-cell">Slow carbs + protein — ideal pre-workout</td>
+      </tr>
+      <tr>
+        <td><span class="subj">Dates</span></td>
+        <td>3 pieces</td>
+        <td>5:00 AM shake</td>
+        <td>~70 cal</td>
+        <td class="tip-cell">Fast sugar — quick energy spike for workout</td>
+      </tr>
+      <tr>
+        <td><span class="subj">Full-Fat Milk</span></td>
+        <td>500ml total</td>
+        <td>250ml shake + 250ml bedtime</td>
+        <td>~300 cal</td>
+        <td class="tip-cell">Protein + calories + casein overnight</td>
+      </tr>
+      <tr>
+        <td><span class="subj">Eggs (Boiled)</span></td>
+        <td>6 eggs/day</td>
+        <td>2 post-workout + 2 before class + 2 dinner side</td>
+        <td>~420 cal</td>
+        <td class="tip-cell">Best protein source per rupee. ~6g protein each</td>
+      </tr>
+      <tr>
+        <td><span class="subj">Banana</span></td>
+        <td>5 bananas/day</td>
+        <td>1 in shake + 1 train + 1 before class + 1–2 return train</td>
+        <td>~500 cal</td>
+        <td class="tip-cell">Cheapest calorie-dense portable fruit. ~100 cal each</td>
+      </tr>
+      <tr>
+        <td><span class="subj">Almonds</span></td>
+        <td>60g/day</td>
+        <td>30g on morning train + 30g afternoon</td>
+        <td>~340 cal</td>
+        <td class="tip-cell">Healthy fat + vitamin E. Your 400g lasts ~6 college days</td>
+      </tr>
+      <tr>
+        <td><span class="subj">Rice</span></td>
+        <td>Large portion</td>
+        <td>Lunch tiffin ~1 PM</td>
+        <td>~400 cal</td>
+        <td class="tip-cell">Primary carb source — fuel for afternoon labs</td>
+      </tr>
+      <tr>
+        <td><span class="subj">Egg Curry (Lunch)</span></td>
+        <td>2–3 eggs in curry</td>
+        <td>Lunch tiffin ~1 PM</td>
+        <td>~300 cal</td>
+        <td class="tip-cell">Protein + fat — keeps you full through afternoon</td>
+      </tr>
+      <tr>
+        <td><span class="subj">Dinner</span></td>
+        <td>Large home portion</td>
+        <td>8:30 PM</td>
+        <td>~700–800 cal</td>
+        <td class="tip-cell">Dal/fish/roti/sabzi — eat whatever is cooked, eat a LOT</td>
+      </tr>
+      <tr>
+        <td><span class="subj">Bread + Peanut Butter</span></td>
+        <td>2 slices</td>
+        <td>5:30 AM post-workout</td>
+        <td>~280 cal</td>
+        <td class="tip-cell">Fast recovery carbs + fat. Skip if peanuts used instead</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- FRUIT NOTE -->
+  <div class="divider"></div>
+  <div class="section-label" style="margin-top:0;">Fruits — What Works, What Doesn't</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;">
+    <div class="train-card do">
+      <div class="tc-icon">🍌</div>
+      <div class="tc-title">Carry These Fruits</div>
+      <ul class="tc-items">
+        <li><strong>Banana</strong> — 5/day. Portable, no mess, 100 cal each, peels easily standing in a train. Your single best travel fruit. Available everywhere in Bongaon.</li>
+        <li><strong>Dates</strong> — 3 in your shake. Not for carrying separately but extremely calorie-dense (23 cal each). Good if you want a sweet afternoon snack instead of almonds occasionally.</li>
+        <li><strong>Guava (amrood)</strong> — seasonal option if available. Cheap, 68 cal/100g, decent vitamin C. Easy to carry whole and eat like an apple.</li>
+      </ul>
+    </div>
+    <div class="train-card dont">
+      <div class="tc-icon">🚫</div>
+      <div class="tc-title">Do NOT Carry These</div>
+      <ul class="tc-items">
+        <li><strong>Watermelon / Cucumber</strong> — 95% water, almost zero calories. Wrong goal for bulking. Not worth carrying.</li>
+        <li><strong>Oranges / Mosambi</strong> — Peeling in a crowded train is a mess. Low calorie per unit of effort.</li>
+        <li><strong>Mango (in season)</strong> — Good at home, too messy and sticky to carry on a commute.</li>
+        <li><strong>Grapes</strong> — Spoil fast in summer heat. Risk of eating something gone bad mid-day.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="notice green" style="margin-top:24px;">
+    <strong>Simple rule for fruits while bulking on a commute:</strong> If it needs cutting, peeling, or a plate — it stays home. If you can eat it with one hand while standing in a train — carry it. Banana wins every time.
+  </div>
+
+  <!-- WEEKLY GROCERY -->
+  <div class="divider"></div>
+  <div class="section-label" style="margin-top:0;">Weekly Grocery Estimate (5 College Days)</div>
+
+  <div class="reality-card" style="margin-top:16px;">
+    <div class="rc-label">What to Buy Each Week</div>
+    <div class="rc-item"><span class="key" style="color:var(--accent2);">Bananas</span> 25–30 bananas/week (5/day × 5 days + home days). Buy a full bunch.</div>
+    <div class="rc-item"><span class="key" style="color:var(--accent2);">Eggs</span> 42 eggs/week minimum (6/day × 5 days + home days). Buy a full tray of 30, restock midweek.</div>
+    <div class="rc-item"><span class="key" style="color:var(--accent2);">Milk</span> ~4 litres/week (500ml/day × 7 days approx).</div>
+    <div class="rc-item"><span class="key" style="color:var(--accent2);">Almonds</span> Your 400g lasts ~6 college days. Buy 300–400g weekly ongoing.</div>
+    <div class="rc-item"><span class="key" style="color:var(--accent2);">Sattu</span> 50g/day × 5 days = 250g/week. Buy 500g packet, lasts 2 weeks.</div>
+    <div class="rc-item"><span class="key" style="color:var(--accent2);">Dates</span> 3/day × 7 days = ~21 dates/week. One 250g pack lasts ~1.5 weeks.</div>
+    <div class="rc-item"><span class="key" style="color:var(--accent2);">Peanut Butter</span> 1 jar (~400g) lasts 2–3 weeks at this usage rate.</div>
+    <div class="rc-item"><span class="key" style="color:var(--text-dim);">Rice + Curry</span> Home supply — coordinate with family for tiffin packing.</div>
+  </div>
+</section>
+
+<!-- ════════════════ CHECKLIST ════════════════ -->
+<section class="section" id="weekly-checklist">
+  <div class="section-label">§ 13 — Tracking</div>
+  <div class="section-title">Weekly <span class="g">Checklist</span></div>
+  <p class="section-sub">Run through this every Sunday evening during planning. If more than 3 items are unchecked, re-evaluate the week.</p>
+
+  <div class="checklist">
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>Android Roadmap Task — Advanced</strong> Current week's roadmap task completed in Monday prime block. Sunday catch-up done if needed.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>Lab Records — Both Signed</strong> Thursday and Friday lab records completed and signed. No pending record from this week.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>Library Past Papers — At Least 1 Subject</strong> Wednesday library session used to solve or collect past year question papers. Notes made.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>6 Subjects Touched This Week</strong> DM, FLAT, DAA, CA, Bio, EVS — all 6 got study time beyond just classes. No subject completely neglected.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>Train Time Utilized — Both Directions, 4+ Days</strong> Morning train used for pre-read, evening train used for review. Not wasted on entertainment.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>Workout — 6 of 7 Days</strong> Bulking phase maintained. All 6 planned workout days completed. Rest day taken intentionally, not from laziness.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>Sleep Protocol — Minimum 4 of 5 College Nights</strong> At least 4 out of 5 college nights slept by 10 PM. Friday exception allowed.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>MAR Documentation Updated</strong> This week's attendance, training, or activity logged in your MAR document. Nothing left undocumented.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>Bag Packed Every Night</strong> Not once did you scramble in the morning looking for notes, lab manual, or ID card. Night-before packing was done every college day.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>Android Progress Log Updated</strong> Saturday weekly review completed. Progress since last week documented. Next week's Monday task pre-decided.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>Weakest Subject Identified + Sunday Dive Done</strong> You know which subject needs work. Sunday 11 AM–1 PM was spent on it specifically.</div>
+    </div>
+    <div class="checklist-item">
+      <div class="ci-box"></div>
+      <div class="ci-text"><strong>No Single Day Completely Off Track</strong> Even on Friday night, you did 30 min of light review. Not one day was a total write-off.</div>
+    </div>
+  </div>
+
+  <div class="notice" style="margin-top:32px; background:rgba(0,229,255,0.04); border-left:3px solid var(--accent);">
+    <strong style="color:var(--accent)">Final Note.</strong> This timetable was built for one person, with one set of constraints, and one long-term goal. It does not compromise on the workout (your health), the Android dev (your career), or the academics (your degree). It asks a lot in return — mostly your sleep and your social media time. <strong style="color:var(--text-bright)">That is the trade. You already decided to make it.</strong> Execute without renegotiating.
+  </div>
+</section>
+
+</main>
+
+<script>
+  // Active sidebar link
+  const sections = document.querySelectorAll('section[id], div[id="reality"]');
+  const links = document.querySelectorAll('.sidebar a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => obs.observe(s));
+
+  // Animate bars on scroll
+  const barObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const fill = e.target.querySelector('.bc-bar-fill');
+        if (fill) fill.style.width = fill.getAttribute('data-width') || fill.style.width;
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.budget-card').forEach(c => barObs.observe(c));
+
+  // Stagger timeline animations
+  document.querySelectorAll('.t-row').forEach((row, i) => {
+    row.style.animationDelay = `${(i % 15) * 0.04}s`;
+  });
+</script>
+</body>
+</html>
